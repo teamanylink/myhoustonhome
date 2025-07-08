@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyHoustonHome - Find Your Perfect Community</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="nav">
+                <div class="logo">
+                    <h1>MyHoustonHome</h1>
+                </div>
+                <nav class="nav-menu">
+                    <a href="#" class="nav-link">Communities</a>
+                    <a href="#" class="nav-link">Listings</a>
+                    <a href="admin.html" class="nav-link">Admin</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h2 class="hero-title">Discover Your Perfect Houston Community</h2>
+                    <p class="hero-subtitle">Explore the best neighborhoods, communities, and listings in Houston</p>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" onclick="navigateToSection('communities')">
+                            <span class="material-icons">location_city</span>
+                            Browse Communities
+                        </button>
+                        <button class="btn btn-secondary" onclick="navigateToSection('listings')">
+                            <span class="material-icons">home</span>
+                            View Listings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section communities-section" id="communities">
+            <div class="container">
+                <h2 class="section-title">Featured Communities</h2>
+                <div class="communities-grid" id="communities-grid">
+                    <!-- Communities will be populated here -->
+                </div>
+            </div>
+        </section>
+
+        <section class="section listings-section" id="listings">
+            <div class="container">
+                <h2 class="section-title">Recent Listings</h2>
+                <div class="listings-grid" id="listings-grid">
+                    <!-- Listings will be populated here -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 MyHoustonHome. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html> 

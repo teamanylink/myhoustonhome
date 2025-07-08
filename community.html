@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community - MyHoustonHome</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="community">
+    <header class="header">
+        <div class="container">
+            <div class="nav">
+                <div class="logo">
+                    <a href="index.html" style="text-decoration: none;">
+                        <h1>MyHoustonHome</h1>
+                    </a>
+                </div>
+                <nav class="nav-menu">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="index.html#communities" class="nav-link">Communities</a>
+                    <a href="index.html#listings" class="nav-link">Listings</a>
+                    <a href="admin.html" class="nav-link">Admin</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <!-- Hero Section -->
+        <section class="community-hero" id="hero-section">
+            <div class="container">
+                <div class="hero-content">
+                    <h1 class="hero-title" id="hero-title">Community Name</h1>
+                    <p class="hero-subtitle" id="hero-subtitle">Welcome to this amazing community</p>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" onclick="scrollToSection('homes')">
+                            <span class="material-icons">home</span>
+                            View Homes
+                        </button>
+                        <button class="btn btn-secondary" onclick="scrollToSection('about')">
+                            <span class="material-icons">info</span>
+                            Learn More
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="section community-about" id="about-section">
+            <div class="container">
+                <h2 class="section-title">About Our Community</h2>
+                <div class="about-content">
+                    <div class="about-text" id="about-text">
+                        <p>Discover what makes this community special...</p>
+                    </div>
+                    <div class="amenities-grid" id="amenities-grid">
+                        <!-- Amenities will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Homes Section -->
+        <section class="section community-homes" id="homes-section">
+            <div class="container">
+                <h2 class="section-title" id="homes-title">Available Homes</h2>
+                <div class="homes-grid" id="homes-grid">
+                    <!-- Homes will be populated here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Builders Section -->
+        <section class="section community-builders" id="builders-section">
+            <div class="container">
+                <h2 class="section-title" id="builders-title">Our Builders</h2>
+                <div class="builders-grid" id="builders-grid">
+                    <!-- Builders will be populated here -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 MyHoustonHome. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="community.js"></script>
+</body>
+</html> 
