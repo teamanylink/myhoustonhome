@@ -1,0 +1,21 @@
+// List of all unique builders with their official website links
+export const builders = [
+  { name: 'Lennar', website: 'https://lennar.com/' },
+  { name: 'KB Home', website: 'https://www.kbhome.com/' },
+  { name: 'Brightland Homes', website: 'https://www.brightlandhomes.com/' },
+  { name: 'David Weekley Homes', website: 'https://www.davidweekleyhomes.com/' },
+  { name: 'Highland Homes', website: 'https://www.highlandhomes.com/' },
+  { name: 'Taylor Morrison', website: 'https://www.taylormorrison.com/' },
+  { name: 'Chesmar Homes', website: 'https://chesmar.com/' },
+  { name: 'Perry Homes', website: 'https://www.perryhomes.com/' },
+  { name: 'Westin Homes', website: 'https://www.westin-homes.com/' },
+  { name: 'Ashton Woods', website: 'https://www.ashtonwoods.com/' },
+  { name: 'Toll Brothers', website: 'https://www.tollbrothers.com/' },
+  { name: 'CastleRock Communities', website: 'https://www.c-rock.com/' },
+  { name: 'Beazer Homes', website: 'https://www.beazer.com/' },
+  { name: 'LGI Homes', website: 'https://www.lgihomes.com/' },
+  { name: 'DSLD Homes', website: 'https://www.dsldhomes.com/' },
+  { name: 'Tricoast Homes', website: 'https://www.tricoasthomes.com/' },
+  { name: 'Davidson Homes', website: 'https://www.davidsonhomes.com/' },
+  { name: 'Empire Communities', website: 'https://empirecommunities.com/' },
+]; 
