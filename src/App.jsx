@@ -1,33 +1,63 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useEffect } from 'react';
 import './styles/ios-design-system.css';
-import { DataService } from './services/dataService';
 
 // Components
 import Navigation from './components/Navigation';
 import HomePage from './pages/HomePage';
 import CommunityPage from './pages/CommunityPage';
 import ListingPage from './pages/ListingPage';
-import AdminPage from './pages/AdminPage';
+import AdminLogin from './pages/AdminLogin';
+
+// Admin Dashboard
+import DashboardLayout from './components/admin/DashboardLayout';
+import Dashboard from './pages/admin/Dashboard';
+import Communities from './pages/admin/Communities';
+import Properties from './pages/admin/Properties';
+import Listings from './pages/admin/Listings';
+import Settings from './pages/admin/Settings';
 
 function App() {
-  useEffect(() => {
-    // Initialize example data on first load
-    DataService.initializeExampleData();
-  }, []);
-
   return (
     <Router>
       <div className="App">
-        <Navigation />
-        <main>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/community/:id" element={<CommunityPage />} />
-            <Route path="/listing/:id" element={<ListingPage />} />
-            <Route path="/admin" element={<AdminPage />} />
-          </Routes>
-        </main>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={
+            <div>
+              <Navigation />
+              <main>
+                <HomePage />
+              </main>
+            </div>
+          } />
+          <Route path="/community/:id" element={
+            <div>
+              <Navigation />
+              <main>
+                <CommunityPage />
+              </main>
+            </div>
+          } />
+          <Route path="/listing/:id" element={
+            <div>
+              <Navigation />
+              <main>
+                <ListingPage />
+              </main>
+            </div>
+          } />
+          
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/*" element={<DashboardLayout />}>
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="communities" element={<Communities />} />
+            <Route path="properties" element={<Properties />} />
+            <Route path="listings" element={<Listings />} />
+            <Route path="settings" element={<Settings />} />
+            <Route index element={<Dashboard />} />
+          </Route>
+        </Routes>
       </div>
     </Router>
   );

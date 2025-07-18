@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
-import { DataService, UIUtils, NotificationService } from '../services/dataService';
+import { DataService } from '../services/apiService';
+import { UIUtils, NotificationService } from '../services/utils';
 
 const ListingPage = () => {
   const { id } = useParams();
@@ -10,21 +12,29 @@ const ListingPage = () => {
   const [showContactForm, setShowContactForm] = useState(false);
 
   useEffect(() => {
-    const foundListing = DataService.getListing(id);
-    if (foundListing) {
-      setListing(foundListing);
-      if (foundListing.communityId) {
-        const foundCommunity = DataService.getCommunity(foundListing.communityId);
-        setCommunity(foundCommunity);
-        
-        // Apply community theming if available
-        if (foundCommunity) {
-          const root = document.documentElement;
-          root.style.setProperty('--primary-color', foundCommunity.theme.primaryColor);
-          root.style.setProperty('--primary-dark', UIUtils.darkenColor(foundCommunity.theme.primaryColor, 0.2));
+    const loadListingData = async () => {
+      try {
+        const foundListing = await DataService.getListing(id);
+        if (foundListing) {
+          setListing(foundListing);
+          if (foundListing.communityId) {
+            const foundCommunity = await DataService.getCommunity(foundListing.communityId);
+            setCommunity(foundCommunity);
+            
+            // Apply community theming if available
+            if (foundCommunity) {
+              const root = document.documentElement;
+              root.style.setProperty('--primary-color', foundCommunity.theme.primaryColor);
+              root.style.setProperty('--primary-dark', UIUtils.darkenColor(foundCommunity.theme.primaryColor, 0.2));
+            }
+          }
         }
+      } catch (error) {
+        console.error('Error loading listing data:', error);
       }
-    }
+    };
+
+    loadListingData();
     
     // Cleanup function
     return () => {
@@ -194,7 +204,6 @@ const ListingPage = () => {
       {showContactForm && (
         <ContactFormModal 
           listing={listing}
-          community={community}
           onClose={() => setShowContactForm(false)}
         />
       )}
@@ -202,7 +211,7 @@ const ListingPage = () => {
   );
 };
 
-const ContactFormModal = ({ listing, community, onClose }) => {
+const ContactFormModal = ({ listing, onClose }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -217,19 +226,24 @@ const ContactFormModal = ({ listing, community, onClose }) => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const contact = {
-      ...formData,
-      listingId: listing.id,
-      listingTitle: listing.title,
-      submittedAt: new Date().toISOString()
-    };
+    try {
+      const contact = {
+        ...formData,
+        listingId: listing.id,
+        listingTitle: listing.title,
+        submittedAt: new Date().toISOString()
+      };
 
-    DataService.saveContact(contact);
-    NotificationService.show('Contact form submitted successfully!', 'success');
-    onClose();
+      await DataService.saveContact(contact);
+      NotificationService.show('Contact form submitted successfully!', 'success');
+      onClose();
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      NotificationService.show('Error submitting contact form', 'error');
+    }
   };
 
   return (

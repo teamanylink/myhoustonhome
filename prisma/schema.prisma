@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Community {
+  id          String   @id
+  name        String
+  description String   @db.Text
+  location    String
+  priceRange  String
+  image       String
+  amenities   String[] // Array of strings for amenities
+  theme       Json     // JSON object for theme settings
+  sections    Json     // JSON object for section visibility and content
+  schools     String[] // Array of strings for schools
+  references  String[] // Array of strings for reference URLs
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  builders Builder[]
+  homes    Home[]
+  listings Listing[]
+
+  @@map("communities")
+}
+
+model Builder {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  contact     String?
+  image       String?
+  website     String?
+
+  // Relations
+  communityId String
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  homes       Home[]
+
+  @@map("builders")
+}
+
+model Home {
+  id        String @id @default(cuid())
+  name      String
+  sqft      Int
+  bedrooms  Int
+  bathrooms Float  // Can be 2.5, 3.5, etc.
+  price     Int
+  image     String?
+  features  String[] // Array of features/amenities
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  communityId String
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  builderId   String?
+  builder     Builder?  @relation(fields: [builderId], references: [id])
+
+  @@map("homes")
+}
+
+model Listing {
+  id          String      @id @default(cuid())
+  title       String
+  description String      @db.Text
+  price       Int
+  address     String
+  bedrooms    Int
+  bathrooms   Float
+  sqft        Int
+  type        ListingType @default(HOUSE)
+  status      ListingStatus @default(AVAILABLE)
+  images      String[]    // Array of image URLs
+  features    String[]    // Array of features
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  communityId String?
+  community   Community? @relation(fields: [communityId], references: [id])
+
+  @@map("listings")
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String   @db.Text
+  source    String?  // Where the contact came from (community page, listing, etc.)
+  createdAt DateTime @default(now())
+
+  @@map("contacts")
+}
+
+enum ListingType {
+  HOUSE
+  TOWNHOME
+  CONDO
+  APARTMENT
+}
+
+enum ListingStatus {
+  AVAILABLE
+  PENDING
+  SOLD
+  UNAVAILABLE
+}
