@@ -48,14 +48,14 @@ function App() {
           } />
           
           {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/admin/*" element={<DashboardLayout />}>
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<DashboardLayout />}>
+            <Route index element={<Dashboard />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="communities" element={<Communities />} />
             <Route path="properties" element={<Properties />} />
             <Route path="listings" element={<Listings />} />
             <Route path="settings" element={<Settings />} />
-            <Route index element={<Dashboard />} />
           </Route>
         </Routes>
       </div>
