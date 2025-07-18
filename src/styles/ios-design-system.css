@@ -219,7 +219,10 @@ body {
   overflow: hidden;
   transition: all var(--transition-normal);
   border: none;
-  max-width: 380px; /* Prevent cards from being too wide */
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .card:hover {
@@ -234,6 +237,9 @@ body {
 
 .card-content {
   padding: var(--spacing-6);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .card-footer {
@@ -707,53 +713,56 @@ body {
 /* iOS Grid System - Responsive & Clean */
 .grid {
   display: grid;
-  gap: var(--spacing-8);
-  justify-items: start; /* Left-align grid items */
+  gap: var(--spacing-6);
+  width: 100%;
 }
 
 .grid-cols-1 { 
-  grid-template-columns: repeat(1, minmax(0, 1fr)); 
-  justify-items: stretch;
+  grid-template-columns: 1fr;
 }
+
 .grid-cols-2 { 
-  grid-template-columns: repeat(auto-fit, minmax(320px, 380px)); 
-  justify-content: start;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-6);
 }
+
 .grid-cols-3 { 
-  grid-template-columns: repeat(auto-fit, minmax(300px, 380px)); 
-  justify-content: start;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-6);
 }
+
 .grid-cols-4 { 
-  grid-template-columns: repeat(auto-fit, minmax(280px, 320px)); 
-  justify-content: start;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-6);
 }
 
-/* Responsive adjustments */
-@media (max-width: 1024px) {
-  .grid-cols-3,
+/* Responsive grid adjustments */
+@media (max-width: 1200px) {
   .grid-cols-4 {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 380px));
-  }
-  
-  .grid {
-    gap: var(--spacing-6);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
 }
 
-@media (max-width: 768px) {
-  .grid-cols-2,
+@media (max-width: 900px) {
   .grid-cols-3,
   .grid-cols-4 {
-    grid-template-columns: 1fr;
-    justify-items: stretch;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
   
   .grid {
     gap: var(--spacing-5);
   }
+}
+
+@media (max-width: 640px) {
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
   
-  .card {
-    max-width: none; /* Allow full width on mobile */
+  .grid {
+    gap: var(--spacing-4);
   }
 }
 
