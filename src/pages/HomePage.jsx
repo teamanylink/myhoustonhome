@@ -149,52 +149,32 @@ const HomePage = () => {
             transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
             {/* Header */}
-            <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+            <div className="custom-section-header">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.2 }}
+                className="custom-section-badge"
                 style={{
-                  display: 'inline-block',
-                  padding: '8px 24px',
-                  background: 'rgba(0, 122, 255, 0.08)',
-                  borderRadius: '50px',
-                  marginBottom: '32px'
+                  background: 'white',
+                  color: 'var(--primary-color)',
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
                 }}
               >
-                <span style={{ 
-                  fontSize: '14px', 
-                  fontWeight: '600', 
-                  color: 'var(--primary-color)',
-                  letterSpacing: '0.5px'
-                }}>
-                  ABOUT MYHOUSTONHOME
-                </span>
+                ABOUT MYHOUSTONHOME
               </motion.div>
               
-              <h2 style={{ 
-                fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', 
-                fontWeight: '700', 
-                color: '#1a1a1a',
-                lineHeight: '1.1',
-                marginBottom: '24px',
-                letterSpacing: '-0.02em'
-              }}>
+              <h2 className="custom-section-title">
                 Your Gateway to Houston's
                 <br />
                 <span style={{ color: 'var(--primary-color)' }}>Premier Communities</span>
               </h2>
               
-              <p style={{ 
-                fontSize: '20px', 
-                color: '#666', 
-                lineHeight: '1.6',
-                maxWidth: '700px',
-                margin: '0 auto'
-              }}>
-                We connect families with exceptional master-planned communities that offer 
-                modern living, world-class amenities, and convenient access to Houston's opportunities.
+              <p className="custom-section-description">
+                We specialize in connecting homebuyers with Houston's most desirable master-planned communities. 
+                From luxury amenities to top-rated schools, we help you find not just a house, but the perfect 
+                neighborhood for your lifestyle.
               </p>
             </div>
 
@@ -386,53 +366,32 @@ const HomePage = () => {
             transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
             {/* Header */}
-            <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+            <div className="custom-section-header">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.2 }}
+                className="custom-section-badge"
                 style={{
-                  display: 'inline-block',
-                  padding: '8px 24px',
                   background: 'white',
-                  borderRadius: '50px',
-                  marginBottom: '32px',
+                  color: 'var(--primary-color)',
                   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
                 }}
               >
-                <span style={{ 
-                  fontSize: '14px', 
-                  fontWeight: '600', 
-                  color: 'var(--primary-color)',
-                  letterSpacing: '0.5px'
-                }}>
-                  WHY HOUSTON
-                </span>
+                WHY HOUSTON
               </motion.div>
               
-              <h2 style={{ 
-                fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', 
-                fontWeight: '700', 
-                color: '#1a1a1a',
-                lineHeight: '1.1',
-                marginBottom: '24px',
-                letterSpacing: '-0.02em'
-              }}>
+              <h2 className="custom-section-title">
                 America's Most
                 <br />
                 <span style={{ color: 'var(--primary-color)' }}>Dynamic City</span>
               </h2>
               
-              <p style={{ 
-                fontSize: '20px', 
-                color: '#666', 
-                lineHeight: '1.6',
-                maxWidth: '700px',
-                margin: '0 auto'
-              }}>
-                Houston combines economic opportunity, cultural richness, and quality of life 
-                like no other major metropolitan area in America.
+              <p className="custom-section-description">
+                Houston offers unmatched job opportunities, world-class dining, diverse culture, 
+                and some of the most affordable luxury living in America. Discover why millions 
+                call Houston home.
               </p>
             </div>
 
