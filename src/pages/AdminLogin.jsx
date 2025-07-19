@@ -44,292 +44,110 @@ const AdminLogin = () => {
 
   if (isLoading) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-      }}>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          border: '3px solid rgba(255, 255, 255, 0.2)',
-          borderTop: '3px solid white',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite'
-        }} />
-        <style>
-          {`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}
-        </style>
+      <div className="min-h-screen flex items-center justify-center bg-secondary">
+        <div className="text-center">
+          <div className="text-large-title mb-4">Loading...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '20px'
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: '400px',
-        background: 'white',
-        borderRadius: '16px',
-        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1)',
-        padding: '48px 32px',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        {/* Subtle background pattern */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '2px',
-          background: 'linear-gradient(90deg, #667eea, #764ba2)'
-        }} />
-
+    <div className="min-h-screen flex items-center justify-center bg-secondary">
+      <div className="w-full max-w-md mx-auto px-6">
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{
-            width: '48px',
-            height: '48px',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            borderRadius: '12px',
-            margin: '0 auto 16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '20px'
-          }}>
-            🏠
-          </div>
-          <h1 style={{
-            fontSize: '24px',
-            fontWeight: '700',
-            color: '#1a1a1a',
-            margin: '0 0 8px 0',
-            letterSpacing: '-0.01em'
-          }}>
-            Welcome back
+        <div className="text-center mb-8">
+          <h1 className="text-title-1 font-bold text-primary mb-2">
+            Admin Login
           </h1>
-          <p style={{
-            fontSize: '15px',
-            color: '#6b7280',
-            margin: 0,
-            fontWeight: '400'
-          }}>
-            Sign in to your account to continue
+          <p className="text-body text-secondary">
+            Sign in to access your dashboard
           </p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleLogin} style={{ marginBottom: '24px' }}>
-          {loginError && (
-            <div style={{
-              padding: '12px 16px',
-              background: '#fef2f2',
-              border: '1px solid #fecaca',
-              borderRadius: '8px',
-              marginBottom: '20px'
-            }}>
-              <p style={{
-                fontSize: '14px',
-                color: '#dc2626',
-                margin: 0,
-                fontWeight: '500'
-              }}>
-                {loginError}
+        {/* Login Form */}
+        <div className="card">
+          <div className="card-content">
+            <form onSubmit={handleLogin} className="space-y-6">
+              {loginError && (
+                <div className="p-4 bg-error-color bg-opacity-10 border border-error-color border-opacity-20 rounded-xl">
+                  <p className="text-sm text-error">{loginError}</p>
+                </div>
+              )}
+
+              <div className="form-group">
+                <label htmlFor="email" className="form-label">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  className="form-input"
+                  placeholder="Enter your email"
+                  value={loginData.email}
+                  onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password" className="form-label">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    className="form-input pr-12"
+                    placeholder="Enter your password"
+                    value={loginData.password}
+                    onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-secondary hover:text-primary transition-colors"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? '🙈' : '👁️'}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="btn btn-primary w-full"
+                disabled={loginLoading}
+              >
+                {loginLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span>⏳</span>
+                    Signing in...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <span>🔐</span>
+                    Sign In
+                  </span>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-secondary">
+                Admin credentials are pre-filled for demo
               </p>
             </div>
-          )}
-
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '600',
-              color: '#374151',
-              marginBottom: '6px'
-            }}>
-              Email address
-            </label>
-            <input
-              type="email"
-              value={loginData.email}
-              onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                fontSize: '15px',
-                fontFamily: 'inherit',
-                transition: 'all 0.2s ease',
-                background: '#fafafa',
-                boxSizing: 'border-box'
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = '#667eea';
-                e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
-                e.target.style.background = 'white';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = '#d1d5db';
-                e.target.style.boxShadow = 'none';
-                e.target.style.background = '#fafafa';
-              }}
-              required
-            />
           </div>
+        </div>
 
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '600',
-              color: '#374151',
-              marginBottom: '6px'
-            }}>
-              Password
-            </label>
-            <div style={{ position: 'relative' }}>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={loginData.password}
-                onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  paddingRight: '44px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '15px',
-                  fontFamily: 'inherit',
-                  transition: 'all 0.2s ease',
-                  background: '#fafafa',
-                  boxSizing: 'border-box'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#667eea';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
-                  e.target.style.background = 'white';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#d1d5db';
-                  e.target.style.boxShadow = 'none';
-                  e.target.style.background = '#fafafa';
-                }}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  color: '#6b7280',
-                  cursor: 'pointer',
-                  fontSize: '16px',
-                  padding: '4px',
-                  borderRadius: '4px',
-                  transition: 'color 0.2s ease'
-                }}
-                onMouseOver={(e) => e.target.style.color = '#374151'}
-                onMouseOut={(e) => e.target.style.color = '#6b7280'}
-              >
-                {showPassword ? '🙈' : '👁️'}
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loginLoading}
-            style={{
-              width: '100%',
-              padding: '12px 24px',
-              background: loginLoading ? '#9ca3af' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '15px',
-              fontWeight: '600',
-              cursor: loginLoading ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s ease',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px'
-            }}
-            onMouseOver={(e) => {
-              if (!loginLoading) {
-                e.target.style.transform = 'translateY(-1px)';
-                e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)';
-              }
-            }}
-            onMouseOut={(e) => {
-              e.target.style.transform = 'none';
-              e.target.style.boxShadow = 'none';
-            }}
-          >
-            {loginLoading ? (
-              <>
-                <div style={{
-                  width: '16px',
-                  height: '16px',
-                  border: '2px solid rgba(255, 255, 255, 0.3)',
-                  borderTop: '2px solid white',
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite'
-                }} />
-                Signing in...
-              </>
-            ) : (
-              'Sign in'
-            )}
-          </button>
-        </form>
-
-        {/* Footer */}
-        <div style={{ textAlign: 'center' }}>
-          <p style={{
-            fontSize: '13px',
-            color: '#6b7280',
-            margin: '0 0 16px 0'
-          }}>
-            Admin credentials are pre-filled for demo
-          </p>
-          <a 
-            href="/"
-            style={{
-              fontSize: '14px',
-              color: '#667eea',
-              textDecoration: 'none',
-              fontWeight: '500',
-              transition: 'color 0.2s ease'
-            }}
-            onMouseOver={(e) => e.target.style.color = '#5b6cdb'}
-            onMouseOut={(e) => e.target.style.color = '#667eea'}
-          >
-            ← Back to website
+        {/* Back to Home */}
+        <div className="text-center mt-6">
+          <a href="/" className="text-primary hover:text-primary-dark transition-colors">
+            ← Back to Home
           </a>
         </div>
       </div>
-
-      <style>
-        {`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}
-      </style>
     </div>
   );
 };
