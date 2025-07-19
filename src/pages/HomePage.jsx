@@ -722,7 +722,7 @@ const CommunityCard = ({ community }) => {
       }}
       whileTap={{ scale: 0.97 }}
     >
-      <Link to={`/community/${community.id}`} className="block">
+      <Link to={`/community/${community.id}`} style={{ textDecoration: 'none' }}>
         {/* Community Image */}
         <div style={{ width: '100%', height: 220, overflow: 'hidden', flexShrink: 0 }}>
           <img 
@@ -737,33 +737,13 @@ const CommunityCard = ({ community }) => {
           />
         </div>
         <div className="card-content">
-          <div className="space-y-4 flex-1">
-            <div>
-              <h3 className="text-title-3 font-bold text-primary mb-2">
-                {community.name}
-              </h3>
-              <p className="text-callout text-secondary font-medium">
-                {community.location}
-              </p>
-            </div>
-            
-            <p className="text-body text-tertiary line-clamp-2 leading-relaxed">
-              {community.description}
+          <div>
+            <h3 className="text-title-3 font-bold text-primary mb-2">
+              {community.name}
+            </h3>
+            <p className="text-callout text-secondary font-medium">
+              {community.location}
             </p>
-            
-            <div className="space-y-3 mt-auto">
-              <div className="text-headline font-bold" style={{ color: community.theme.primaryColor }}>
-                {community.priceRange}
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-footnote text-secondary bg-secondary px-3 py-1 rounded-full">
-                  {community.amenities.length} amenities
-                </span>
-                <span className="text-footnote text-secondary bg-secondary px-3 py-1 rounded-full">
-                  {community.builders.length} builders
-                </span>
-              </div>
-            </div>
           </div>
         </div>
       </Link>
