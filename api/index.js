@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { DatabaseService } from '../src/services/databaseService.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -15,10 +16,7 @@ const SALT_ROUNDS = 10;
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// In-memory storage (replace with actual database in production)
-let communities = [];
-let listings = [];
-let contacts = [];
+// In-memory storage for admin users only (communities, listings, contacts use database)
 let admins = [];
 
 // Initialize default admin
@@ -226,152 +224,228 @@ app.delete('/api/admin/users/:id', authenticateAdmin, requireSuperAdmin, (req, r
 });
 
 // ===== PROTECTED COMMUNITY ROUTES =====
-app.get('/api/communities', authenticateAdmin, (req, res) => {
-  res.json(communities);
-});
-
-app.get('/api/communities/:id', authenticateAdmin, (req, res) => {
-  const community = communities.find(c => c.id === req.params.id);
-  if (!community) {
-    return res.status(404).json({ error: 'Community not found' });
+app.get('/api/communities', authenticateAdmin, async (req, res) => {
+  try {
+    const communities = await DatabaseService.getCommunities();
+    res.json(communities);
+  } catch (error) {
+    console.error('Error fetching communities:', error);
+    res.status(500).json({ error: 'Failed to fetch communities' });
   }
-  res.json(community);
 });
 
-app.post('/api/communities', authenticateAdmin, (req, res) => {
-  const community = {
-    id: req.body.id || `community-${Date.now()}`,
-    ...req.body,
-    createdAt: new Date().toISOString()
-  };
-  communities.push(community);
-  res.status(201).json(community);
-});
-
-app.put('/api/communities/:id', authenticateAdmin, (req, res) => {
-  const index = communities.findIndex(c => c.id === req.params.id);
-  if (index === -1) {
-    return res.status(404).json({ error: 'Community not found' });
+app.get('/api/communities/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const community = await DatabaseService.getCommunity(req.params.id);
+    if (!community) {
+      return res.status(404).json({ error: 'Community not found' });
+    }
+    res.json(community);
+  } catch (error) {
+    console.error('Error fetching community:', error);
+    res.status(500).json({ error: 'Failed to fetch community' });
   }
-  communities[index] = { ...communities[index], ...req.body };
-  res.json(communities[index]);
 });
 
-app.delete('/api/communities/:id', authenticateAdmin, (req, res) => {
-  const index = communities.findIndex(c => c.id === req.params.id);
-  if (index === -1) {
-    return res.status(404).json({ error: 'Community not found' });
+app.post('/api/communities', authenticateAdmin, async (req, res) => {
+  try {
+    const communityData = {
+      id: req.body.id || `community-${Date.now()}`,
+      ...req.body
+    };
+    const community = await DatabaseService.createCommunity(communityData);
+    res.status(201).json(community);
+  } catch (error) {
+    console.error('Error creating community:', error);
+    res.status(500).json({ error: 'Failed to create community' });
   }
-  communities.splice(index, 1);
-  res.json({ message: 'Community deleted successfully' });
+});
+
+app.put('/api/communities/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const community = await DatabaseService.updateCommunity(req.params.id, req.body);
+    if (!community) {
+      return res.status(404).json({ error: 'Community not found' });
+    }
+    res.json(community);
+  } catch (error) {
+    console.error('Error updating community:', error);
+    res.status(500).json({ error: 'Failed to update community' });
+  }
+});
+
+app.delete('/api/communities/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const success = await DatabaseService.deleteCommunity(req.params.id);
+    if (!success) {
+      return res.status(404).json({ error: 'Community not found' });
+    }
+    res.json({ message: 'Community deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting community:', error);
+    res.status(500).json({ error: 'Failed to delete community' });
+  }
 });
 
 // ===== PROTECTED LISTING ROUTES =====
-app.get('/api/listings', authenticateAdmin, (req, res) => {
-  const { communityId } = req.query;
-  let result = listings;
-  
-  if (communityId) {
-    result = listings.filter(l => l.communityId === communityId);
+app.get('/api/listings', authenticateAdmin, async (req, res) => {
+  try {
+    const { communityId } = req.query;
+    const filters = {};
+    if (communityId) filters.communityId = communityId;
+    
+    const listings = await DatabaseService.getListings(communityId, filters);
+    res.json(listings);
+  } catch (error) {
+    console.error('Error fetching listings:', error);
+    res.status(500).json({ error: 'Failed to fetch listings' });
   }
-  
-  res.json(result);
 });
 
-app.get('/api/listings/:id', authenticateAdmin, (req, res) => {
-  const listing = listings.find(l => l.id === req.params.id);
-  if (!listing) {
-    return res.status(404).json({ error: 'Listing not found' });
+app.get('/api/listings/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const listing = await DatabaseService.getListing(req.params.id);
+    if (!listing) {
+      return res.status(404).json({ error: 'Listing not found' });
+    }
+    res.json(listing);
+  } catch (error) {
+    console.error('Error fetching listing:', error);
+    res.status(500).json({ error: 'Failed to fetch listing' });
   }
-  res.json(listing);
 });
 
-app.post('/api/listings', authenticateAdmin, (req, res) => {
-  const listing = {
-    id: req.body.id || `listing-${Date.now()}`,
-    ...req.body,
-    createdAt: new Date().toISOString()
-  };
-  listings.push(listing);
-  res.status(201).json(listing);
+app.post('/api/listings', authenticateAdmin, async (req, res) => {
+  try {
+    const listingData = {
+      id: req.body.id || `listing-${Date.now()}`,
+      ...req.body
+    };
+    const listing = await DatabaseService.createListing(listingData);
+    res.status(201).json(listing);
+  } catch (error) {
+    console.error('Error creating listing:', error);
+    res.status(500).json({ error: 'Failed to create listing' });
+  }
 });
 
-app.put('/api/listings/:id', authenticateAdmin, (req, res) => {
-  const index = listings.findIndex(l => l.id === req.params.id);
-  if (index === -1) {
-    return res.status(404).json({ error: 'Listing not found' });
+app.put('/api/listings/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const listing = await DatabaseService.updateListing(req.params.id, req.body);
+    if (!listing) {
+      return res.status(404).json({ error: 'Listing not found' });
+    }
+    res.json(listing);
+  } catch (error) {
+    console.error('Error updating listing:', error);
+    res.status(500).json({ error: 'Failed to update listing' });
   }
-  listings[index] = { ...listings[index], ...req.body };
-  res.json(listings[index]);
 });
 
-app.delete('/api/listings/:id', authenticateAdmin, (req, res) => {
-  const index = listings.findIndex(l => l.id === req.params.id);
-  if (index === -1) {
-    return res.status(404).json({ error: 'Listing not found' });
+app.delete('/api/listings/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const success = await DatabaseService.deleteListing(req.params.id);
+    if (!success) {
+      return res.status(404).json({ error: 'Listing not found' });
+    }
+    res.json({ message: 'Listing deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting listing:', error);
+    res.status(500).json({ error: 'Failed to delete listing' });
   }
-  listings.splice(index, 1);
-  res.json({ message: 'Listing deleted successfully' });
 });
 
 // ===== PROTECTED CONTACT ROUTES =====
-app.get('/api/contacts', authenticateAdmin, (req, res) => {
-  res.json(contacts);
+app.get('/api/contacts', authenticateAdmin, async (req, res) => {
+  try {
+    const contacts = await DatabaseService.getContacts();
+    res.json(contacts);
+  } catch (error) {
+    console.error('Error fetching contacts:', error);
+    res.status(500).json({ error: 'Failed to fetch contacts' });
+  }
 });
 
 // Public contact form submission (not protected)
-app.post('/api/contacts', (req, res) => {
-  const contact = {
-    id: `contact-${Date.now()}`,
-    ...req.body,
-    createdAt: new Date().toISOString()
-  };
-  contacts.push(contact);
-  res.status(201).json(contact);
+app.post('/api/contacts', async (req, res) => {
+  try {
+    const contactData = {
+      id: `contact-${Date.now()}`,
+      ...req.body
+    };
+    const contact = await DatabaseService.createContact(contactData);
+    res.status(201).json(contact);
+  } catch (error) {
+    console.error('Error creating contact:', error);
+    res.status(500).json({ error: 'Failed to create contact' });
+  }
 });
 
-app.delete('/api/contacts/:id', authenticateAdmin, (req, res) => {
-  const index = contacts.findIndex(c => c.id === req.params.id);
-  if (index === -1) {
-    return res.status(404).json({ error: 'Contact not found' });
+app.delete('/api/contacts/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const success = await DatabaseService.deleteContact(req.params.id);
+    if (!success) {
+      return res.status(404).json({ error: 'Contact not found' });
+    }
+    res.json({ message: 'Contact deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting contact:', error);
+    res.status(500).json({ error: 'Failed to delete contact' });
   }
-  contacts.splice(index, 1);
-  res.json({ message: 'Contact deleted successfully' });
 });
 
 // ===== PUBLIC ROUTES (No Authentication Required) =====
 
 // Public community routes
-app.get('/api/public/communities', (req, res) => {
-  res.json(communities);
+app.get('/api/public/communities', async (req, res) => {
+  try {
+    const communities = await DatabaseService.getCommunities();
+    res.json(communities);
+  } catch (error) {
+    console.error('Error fetching communities:', error);
+    res.status(500).json({ error: 'Failed to fetch communities' });
+  }
 });
 
-app.get('/api/public/communities/:id', (req, res) => {
-  const community = communities.find(c => c.id === req.params.id);
-  if (!community) {
-    return res.status(404).json({ error: 'Community not found' });
+app.get('/api/public/communities/:id', async (req, res) => {
+  try {
+    const community = await DatabaseService.getCommunity(req.params.id);
+    if (!community) {
+      return res.status(404).json({ error: 'Community not found' });
+    }
+    res.json(community);
+  } catch (error) {
+    console.error('Error fetching community:', error);
+    res.status(500).json({ error: 'Failed to fetch community' });
   }
-  res.json(community);
 });
 
 // Public listing routes
-app.get('/api/public/listings', (req, res) => {
-  const { communityId } = req.query;
-  let result = listings;
-  
-  if (communityId) {
-    result = listings.filter(l => l.communityId === communityId);
+app.get('/api/public/listings', async (req, res) => {
+  try {
+    const { communityId } = req.query;
+    const filters = {};
+    if (communityId) filters.communityId = communityId;
+    
+    const listings = await DatabaseService.getListings(communityId, filters);
+    res.json(listings);
+  } catch (error) {
+    console.error('Error fetching listings:', error);
+    res.status(500).json({ error: 'Failed to fetch listings' });
   }
-  
-  res.json(result);
 });
 
-app.get('/api/public/listings/:id', (req, res) => {
-  const listing = listings.find(l => l.id === req.params.id);
-  if (!listing) {
-    return res.status(404).json({ error: 'Listing not found' });
+app.get('/api/public/listings/:id', async (req, res) => {
+  try {
+    const listing = await DatabaseService.getListing(req.params.id);
+    if (!listing) {
+      return res.status(404).json({ error: 'Listing not found' });
+    }
+    res.json(listing);
+  } catch (error) {
+    console.error('Error fetching listing:', error);
+    res.status(500).json({ error: 'Failed to fetch listing' });
   }
-  res.json(listing);
 });
 
 // Public contact form submission
