@@ -375,14 +375,55 @@ app.get('/api/public/listings/:id', (req, res) => {
 });
 
 // Public contact form submission
-app.post('/api/public/contacts', (req, res) => {
-  const contact = {
-    id: `contact-${Date.now()}`,
-    ...req.body,
-    createdAt: new Date().toISOString()
-  };
-  contacts.push(contact);
-  res.status(201).json(contact);
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, phone, message, interest } = req.body;
+    
+    // Validate required fields
+    if (!name || !email || !message || !interest) {
+      return res.status(400).json({ error: 'Name, email, message, and interest are required.' });
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Please enter a valid email address.' });
+    }
+    
+    // Create contact submission
+    const contact = {
+      id: `contact-${Date.now()}`,
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      phone: phone ? phone.trim() : null,
+      message: message.trim(),
+      interest,
+      submittedAt: new Date().toISOString(),
+      status: 'new'
+    };
+    
+    contacts.push(contact);
+    
+    // Log submission for development
+    console.log('📧 New contact submission:', {
+      id: contact.id,
+      name: contact.name,
+      email: contact.email,
+      interest: contact.interest
+    });
+    
+    // Simulate processing time
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    res.status(201).json({ 
+      success: true, 
+      message: 'Thank you for your message! We\'ll get back to you soon.',
+      id: contact.id
+    });
+  } catch (error) {
+    console.error('Contact form error:', error);
+    res.status(500).json({ error: 'There was an error processing your message. Please try again.' });
+  }
 });
 
 // 404 handler

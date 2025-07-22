@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import apiService from '../services/apiService';
 
 const AdminLogin = () => {
@@ -53,36 +53,95 @@ const AdminLogin = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary">
-      <div className="w-full max-w-md mx-auto px-6">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-title-1 font-bold text-primary mb-2">
-            Admin Login
-          </h1>
-          <p className="text-body text-secondary">
-            Sign in to access your dashboard
-          </p>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: '#f5f5f7' }}>
+      <div style={{ width: '360px', maxWidth: '90%' }}>
+        {/* Logo */}
+        <div className="text-center mb-6">
+          <Link to="/">
+            <div style={{ 
+              fontSize: '24px', 
+              fontWeight: 'bold', 
+              color: '#1D1D1F' 
+            }}>
+              MyHoustonHome
+            </div>
+          </Link>
         </div>
-
-        {/* Login Form */}
-        <div className="card">
-          <div className="card-content">
-            <form onSubmit={handleLogin} className="space-y-6">
+        
+        {/* Login Card */}
+        <div style={{ 
+          background: 'white', 
+          borderRadius: '12px', 
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)', 
+          overflow: 'hidden'
+        }}>
+          {/* Card Header */}
+          <div style={{ 
+            padding: '24px 24px 0 24px',
+            textAlign: 'center'
+          }}>
+            <h1 style={{ 
+              fontSize: '22px', 
+              fontWeight: '700', 
+              color: '#1D1D1F', 
+              marginBottom: '8px' 
+            }}>
+              Admin Login
+            </h1>
+            <p style={{ 
+              fontSize: '14px', 
+              color: '#86868B', 
+              marginBottom: '24px' 
+            }}>
+              Sign in to access your dashboard
+            </p>
+          </div>
+          
+          {/* Card Content */}
+          <div style={{ padding: '0 24px 24px 24px' }}>
+            <form onSubmit={handleLogin}>
               {loginError && (
-                <div className="p-4 bg-error-color bg-opacity-10 border border-error-color border-opacity-20 rounded-xl">
-                  <p className="text-sm text-error">{loginError}</p>
+                <div style={{ 
+                  padding: '12px', 
+                  background: 'rgba(255, 59, 48, 0.08)', 
+                  border: '1px solid rgba(255, 59, 48, 0.2)', 
+                  borderRadius: '8px', 
+                  marginBottom: '16px' 
+                }}>
+                  <p style={{ 
+                    fontSize: '13px', 
+                    color: '#FF3B30', 
+                    margin: 0 
+                  }}>
+                    {loginError}
+                  </p>
                 </div>
               )}
 
-              <div className="form-group">
-                <label htmlFor="email" className="form-label">
+              <div style={{ marginBottom: '16px' }}>
+                <label 
+                  htmlFor="email" 
+                  style={{ 
+                    display: 'block', 
+                    fontSize: '14px', 
+                    fontWeight: '600', 
+                    color: '#1D1D1F', 
+                    marginBottom: '6px' 
+                  }}
+                >
                   Email Address
                 </label>
                 <input
                   type="email"
                   id="email"
-                  className="form-input"
+                  style={{ 
+                    width: '100%', 
+                    padding: '10px 12px', 
+                    border: '1px solid #E5E7EB', 
+                    borderRadius: '8px', 
+                    fontSize: '15px', 
+                    transition: 'all 0.15s ease' 
+                  }}
                   placeholder="Enter your email"
                   value={loginData.email}
                   onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
@@ -90,15 +149,32 @@ const AdminLogin = () => {
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="password" className="form-label">
+              <div style={{ marginBottom: '20px' }}>
+                <label 
+                  htmlFor="password" 
+                  style={{ 
+                    display: 'block', 
+                    fontSize: '14px', 
+                    fontWeight: '600', 
+                    color: '#1D1D1F', 
+                    marginBottom: '6px' 
+                  }}
+                >
                   Password
                 </label>
-                <div className="relative">
+                <div style={{ position: 'relative' }}>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     id="password"
-                    className="form-input pr-12"
+                    style={{ 
+                      width: '100%', 
+                      padding: '10px 12px', 
+                      paddingRight: '40px', 
+                      border: '1px solid #E5E7EB', 
+                      borderRadius: '8px', 
+                      fontSize: '15px', 
+                      transition: 'all 0.15s ease' 
+                    }}
                     placeholder="Enter your password"
                     value={loginData.password}
                     onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
@@ -106,7 +182,17 @@ const AdminLogin = () => {
                   />
                   <button
                     type="button"
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-secondary hover:text-primary transition-colors"
+                    style={{ 
+                      position: 'absolute', 
+                      right: '12px', 
+                      top: '50%', 
+                      transform: 'translateY(-50%)', 
+                      background: 'none', 
+                      border: 'none', 
+                      cursor: 'pointer', 
+                      color: '#86868B', 
+                      fontSize: '16px' 
+                    }}
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? '🙈' : '👁️'}
@@ -116,36 +202,64 @@ const AdminLogin = () => {
 
               <button
                 type="submit"
-                className="btn btn-primary w-full"
+                style={{ 
+                  width: '100%', 
+                  padding: '12px', 
+                  background: '#007AFF', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '8px', 
+                  fontSize: '15px', 
+                  fontWeight: '600', 
+                  cursor: 'pointer', 
+                  transition: 'all 0.15s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
                 disabled={loginLoading}
               >
                 {loginLoading ? (
-                  <span className="flex items-center justify-center gap-2">
+                  <>
                     <span>⏳</span>
-                    Signing in...
-                  </span>
+                    <span>Signing in...</span>
+                  </>
                 ) : (
-                  <span className="flex items-center justify-center gap-2">
+                  <>
                     <span>🔐</span>
-                    Sign In
-                  </span>
+                    <span>Sign In</span>
+                  </>
                 )}
               </button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-sm text-secondary">
+              
+              <div style={{ 
+                marginTop: '16px', 
+                textAlign: 'center', 
+                fontSize: '13px', 
+                color: '#86868B' 
+              }}>
                 Admin credentials are pre-filled for demo
-              </p>
-            </div>
+              </div>
+            </form>
           </div>
         </div>
-
+        
         {/* Back to Home */}
-        <div className="text-center mt-6">
-          <a href="/" className="text-primary hover:text-primary-dark transition-colors">
+        <div style={{ 
+          textAlign: 'center', 
+          marginTop: '20px'
+        }}>
+          <Link 
+            to="/" 
+            style={{ 
+              color: '#007AFF', 
+              fontSize: '14px', 
+              textDecoration: 'none' 
+            }}
+          >
             ← Back to Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>
