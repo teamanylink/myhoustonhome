@@ -4,8 +4,8 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { DataService } from '../services/apiService';
 import { UIUtils } from '../services/utils';
-import CommunityNavigation from '../components/CommunityNavigation';
-import ContactFormPopup from '../components/ContactFormPopup';
+import CommunityNavigation from '../components/CommunityNavigation.jsx';
+import ContactFormPopup from '../components/ContactFormPopup.jsx';
 
 // Custom Shape Divider Component
 const ShapeDivider = ({ type, position, color, opacity = 1 }) => {
