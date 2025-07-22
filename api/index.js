@@ -4,6 +4,7 @@ import cors from 'cors';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { DatabaseService } from '../src/services/databaseService.js';
+import { put, list, del } from '@vercel/blob';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -476,7 +477,7 @@ app.post('/api/contact', async (req, res) => {
       status: 'new'
     };
     
-    contacts.push(contact);
+    // contacts.push(contact); // This line was removed as per the new_code, as contacts is no longer in-memory
     
     // Log submission for development
     console.log('📧 New contact submission:', {
@@ -497,6 +498,84 @@ app.post('/api/contact', async (req, res) => {
   } catch (error) {
     console.error('Contact form error:', error);
     res.status(500).json({ error: 'There was an error processing your message. Please try again.' });
+  }
+});
+
+// ===== IMAGE MANAGEMENT ENDPOINTS =====
+
+// Get all images (including static)
+app.get('/api/images', authenticateAdmin, async (req, res) => {
+  try {
+    // Get uploaded images from Vercel Blob
+    let uploadedImages = [];
+    try {
+      const { blobs } = await list({ prefix: 'images/' });
+      uploadedImages = blobs.map(blob => ({
+        url: blob.url,
+        filename: blob.pathname.replace('images/', ''),
+        size: blob.size,
+        uploadedAt: blob.uploadedAt,
+        isStatic: false
+      }));
+    } catch (error) {
+      console.log('Error listing Blob images:', error);
+    }
+    
+    res.json({ 
+      images: uploadedImages,
+      success: true
+    });
+  } catch (error) {
+    console.error('Error getting images:', error);
+    res.status(500).json({ error: 'Failed to get images' });
+  }
+});
+
+// Upload image
+app.post('/api/upload', authenticateAdmin, async (req, res) => {
+  try {
+    const { filename, file } = req.body;
+    
+    if (!filename || !file) {
+      return res.status(400).json({ error: 'Filename and file data required' });
+    }
+
+    // Convert base64 to buffer
+    const buffer = Buffer.from(file.split(',')[1], 'base64');
+    
+    // Upload to Vercel Blob
+    const { url } = await put(`images/${filename}`, buffer, { 
+      access: 'public' 
+    });
+
+    res.status(200).json({ 
+      success: true, 
+      url: url,
+      filename: filename 
+    });
+
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ error: 'Failed to upload image' });
+  }
+});
+
+// Delete image
+app.delete('/api/upload', authenticateAdmin, async (req, res) => {
+  try {
+    const { url } = req.body;
+    
+    if (!url) {
+      return res.status(400).json({ error: 'Image URL required' });
+    }
+
+    await del(url);
+
+    res.status(200).json({ success: true });
+
+  } catch (error) {
+    console.error('Delete error:', error);
+    res.status(500).json({ error: 'Failed to delete image' });
   }
 });
 

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { DataService } from '../services/apiService';
 import { UIUtils, NotificationService } from '../services/utils';
+import ImageSelector from '../components/admin/ImageSelector';
 
 // Simple data models for the admin interface
 class Community {
@@ -673,6 +674,7 @@ const CommunityForm = ({ community, onClose, onSave }) => {
       description: '',
       location: '',
       priceRange: '',
+      image: '/images/communities/default.jpg', // Default image
       amenities: [],
       builders: [],
       homes: [],
@@ -688,7 +690,7 @@ const CommunityForm = ({ community, onClose, onSave }) => {
           subtitle: '',
           backgroundType: 'image',
           backgroundColor: '#ffffff',
-          backgroundImage: '',
+          backgroundImage: '/images/hero-community-bg.jpg', // Default background image
           backgroundVideo: '',
           backgroundOpacity: 1.0,
           overlayColor: '#ffffff',
@@ -795,10 +797,65 @@ const CommunityForm = ({ community, onClose, onSave }) => {
                   value={formData.location}
                   onChange={handleChange}
                   className="form-input"
+                  placeholder="e.g., Sugar Land, TX"
                   required
                 />
               </div>
             </div>
+          </div>
+
+          {/* Add the ImageSelector for the main community image */}
+          <div className="form-section">
+            <h4 className="form-section-title">Community Image</h4>
+            <ImageSelector
+              value={formData.image}
+              onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
+              label="Main Community Image"
+            />
+          </div>
+
+          {/* Add the ImageSelector for the hero background image */}
+          <div className="form-section">
+            <h4 className="form-section-title">Hero Section</h4>
+            <div className="form-grid">
+              <div className="form-group">
+                <label className="form-label">Hero Title</label>
+                <input
+                  type="text"
+                  name="sections.hero.title"
+                  value={formData.sections.hero.title}
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="Welcome to [Community Name]"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Hero Subtitle</label>
+                <input
+                  type="text"
+                  name="sections.hero.subtitle"
+                  value={formData.sections.hero.subtitle}
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="Your dream home awaits..."
+                />
+              </div>
+            </div>
+            
+            <ImageSelector
+              value={formData.sections.hero.backgroundImage}
+              onChange={(url) => setFormData(prev => ({
+                ...prev,
+                sections: {
+                  ...prev.sections,
+                  hero: {
+                    ...prev.sections.hero,
+                    backgroundImage: url
+                  }
+                }
+              }))}
+              label="Hero Background Image"
+            />
           </div>
 
           <div className="form-section">
@@ -926,9 +983,36 @@ const ListingForm = ({ listing, communities, onClose, onSave }) => {
       sqft: '',
       communityId: '',
       type: 'house',
-      status: 'available'
+      status: 'available',
+      images: [] // Initialize empty images array
     }
   );
+
+  // Add function to handle adding images
+  const addImage = () => {
+    setFormData(prev => ({
+      ...prev,
+      images: [...prev.images, '']
+    }));
+  };
+
+  // Add function to handle removing images
+  const removeImage = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+
+  // Add function to update a specific image
+  const updateImage = (index, url) => {
+    const newImages = [...formData.images];
+    newImages[index] = url;
+    setFormData(prev => ({
+      ...prev,
+      images: newImages
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -937,8 +1021,10 @@ const ListingForm = ({ listing, communities, onClose, onSave }) => {
         ...formData,
         price: parseInt(formData.price),
         bedrooms: parseInt(formData.bedrooms),
-        bathrooms: parseInt(formData.bathrooms),
-        sqft: parseInt(formData.sqft)
+        bathrooms: parseFloat(formData.bathrooms),
+        sqft: parseInt(formData.sqft),
+        // Filter out empty image URLs
+        images: formData.images.filter(img => img.trim() !== '')
       });
       await DataService.saveListing(listingData);
       NotificationService.show(
@@ -1118,6 +1204,44 @@ const ListingForm = ({ listing, communities, onClose, onSave }) => {
                 <option value="sold">Sold</option>
               </select>
             </div>
+          </div>
+
+          {/* Add the Images section */}
+          <div className="form-section">
+            <h4 className="form-section-title">Listing Images</h4>
+            
+            {formData.images.length === 0 && (
+              <p className="text-secondary text-sm mb-4">No images added yet. Add images to showcase this property.</p>
+            )}
+            
+            {formData.images.map((image, index) => (
+              <div key={index} className="mb-4 p-4 bg-secondary rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <h5 className="text-body font-medium">Image {index + 1}</h5>
+                  <button 
+                    type="button" 
+                    onClick={() => removeImage(index)}
+                    className="btn-ghost text-error"
+                  >
+                    Remove
+                  </button>
+                </div>
+                
+                <ImageSelector
+                  value={image}
+                  onChange={(url) => updateImage(index, url)}
+                  label={`Property Image ${index + 1}`}
+                />
+              </div>
+            ))}
+            
+            <button 
+              type="button" 
+              onClick={addImage}
+              className="btn btn-secondary mt-2"
+            >
+              + Add Image
+            </button>
           </div>
 
           <div className="flex gap-3">
