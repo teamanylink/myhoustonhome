@@ -114,32 +114,125 @@ const HomePage = () => {
   return (
     <div className="home-page">
       {/* Hero Section */}
-      <motion.section 
-        className="hero"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+      <section 
+        className="hero-section"
+        style={{
+          backgroundImage: 'url(/images/communities/brookewater.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          position: 'relative',
+          height: '90vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          padding: '0',
+          paddingTop: '80px', // Add padding to account for the fixed header
+          color: '#1D1D1F'
+        }}
       >
-        <div className="container">
-          <h1 className="hero-title">
-            Find Your Perfect Home in Houston
-          </h1>
-          <p className="hero-subtitle">
-            Discover luxury communities and exceptional homes across the greater Houston area
-          </p>
-          <div className="hero-actions">
-            <Link to="#communities" className="btn btn-primary">
+        {/* Overlay */}
+        <div 
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            zIndex: 1
+          }}
+        />
+        
+        <div 
+          className="container" 
+          style={{
+            position: 'relative',
+            zIndex: 2,
+            maxWidth: '1400px',
+            margin: '0 auto',
+            paddingLeft: '5%',
+            paddingRight: '5%',
+            textAlign: 'left',
+            width: '100%'
+          }}
+        >
+          <div style={{ maxWidth: '650px', marginLeft: '0' }}>
+            <div 
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                borderRadius: '100px',
+                padding: '6px 14px',
+                marginBottom: '20px'
+              }}
+            >
+              <div 
+                style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: '#007AFF',
+                  marginRight: '8px'
+                }}
+              />
+              <span style={{ fontSize: '13px', fontWeight: '500' }}>Rivera Real Estate Group</span>
+            </div>
+            
+            <h1 
+              style={{
+                fontSize: 'clamp(2.5rem, 4vw, 3.5rem)',
+                fontWeight: '700',
+                lineHeight: '1.2',
+                marginBottom: '20px',
+                color: '#1D1D1F',
+                letterSpacing: '-0.02em'
+              }}
+            >
+              Find Your Perfect<br />
+              Houston Community
+            </h1>
+            
+            <p 
+              style={{
+                fontSize: '16px',
+                lineHeight: '1.6',
+                marginBottom: '32px',
+                maxWidth: '580px',
+                color: '#4B4B4B'
+              }}
+            >
+              Discover the ideal neighborhood for your lifestyle with personalized
+              recommendations and local insights across the greater Houston area.
+            </p>
+            
+            <Link 
+              to="#communities" 
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                backgroundColor: '#007AFF',
+                color: 'white',
+                padding: '14px 28px',
+                borderRadius: '100px',
+                fontWeight: '500',
+                fontSize: '15px',
+                textDecoration: 'none',
+                boxShadow: '0 2px 10px rgba(0, 122, 255, 0.2)'
+              }}
+            >
+              <i 
+                className="fas fa-map-marker-alt" 
+                style={{ marginRight: '8px' }}
+              />
               Explore Communities
-            </Link>
-            <Link to="#listings" className="btn btn-secondary">
-              View All Homes
             </Link>
           </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* About MyHoustonHome Section */}
-      <section style={{ padding: '120px 0', background: 'white' }}>
+      <section style={{ padding: '120px 0 160px', background: 'white' }}>
         <div className="container">
           <motion.div 
             style={{ maxWidth: '1200px', margin: '0 auto' }}
@@ -340,8 +433,8 @@ const HomePage = () => {
 
       {/* Why Houston Section */}
       <section style={{ 
-        padding: '120px 0', 
-        background: 'linear-gradient(135deg, #fafbfc 0%, #f8f9fa 100%)',
+        padding: '120px 0 160px', 
+        background: 'white',
         position: 'relative',
         overflow: 'hidden'
       }}>
@@ -599,13 +692,32 @@ const HomePage = () => {
       </section>
 
       {/* Communities Section */}
-      <section id="communities" className="section">
+      <section id="communities" className="section" style={{ paddingBottom: 'var(--spacing-24)', background: 'white' }}>
         <div className="container">
           <div className="section-header">
             <h2 className="section-title">Featured Communities</h2>
             <p className="section-subtitle">
               Explore master-planned communities designed for modern living
             </p>
+            <div style={{ textAlign: 'center', marginTop: '16px' }}>
+              <Link 
+                to="/communities" 
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  color: 'var(--primary-color)',
+                  fontWeight: '600',
+                  fontSize: '16px',
+                  textDecoration: 'none',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                View All Communities
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginLeft: '6px' }}>
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </Link>
+            </div>
           </div>
 
           <motion.div 
@@ -627,41 +739,6 @@ const HomePage = () => {
               <p className="text-secondary">No communities available yet.</p>
               <Link to="/admin" className="btn btn-primary">
                 Add Your First Community
-              </Link>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Listings Section */}
-      <section id="listings" className="section bg-secondary">
-        <div className="container">
-          <div className="section-header">
-            <h2 className="section-title">Latest Listings</h2>
-            <p className="section-subtitle">
-              Discover beautiful homes available now
-            </p>
-          </div>
-
-          <motion.div 
-            className="grid grid-cols-3"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-          >
-            {listings.slice(0, 6).map((listing) => (
-              <motion.div key={listing.id} variants={itemVariants}>
-                <ListingCard listing={listing} />
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {listings.length === 0 && (
-            <div className="text-center space-y-4">
-              <p className="text-secondary">No listings available yet.</p>
-              <Link to="/admin" className="btn btn-primary">
-                Add Your First Listing
               </Link>
             </div>
           )}

@@ -4,6 +4,8 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { DataService } from '../services/apiService';
 import { UIUtils } from '../services/utils';
+import CommunityNavigation from '../components/CommunityNavigation';
+import ContactFormPopup from '../components/ContactFormPopup';
 
 // Custom Shape Divider Component
 const ShapeDivider = ({ type, position, color, opacity = 1 }) => {
@@ -47,9 +49,9 @@ const hexToRgb = (hex) => {
 // Helper function to generate hero background style
 const getHeroBackgroundStyle = (heroConfig, communityImage) => {
   const { backgroundType, backgroundColor, backgroundImage } = heroConfig;
-  // Always use a dark overlay for the hero section
-  const overlayRgba = '0, 0, 0';
-  const overlayOpacity = 0.4;
+  // Use a light overlay for the hero section to match HomePage style
+  const overlayRgba = '255, 255, 255';
+  const overlayOpacity = 0.85;
 
   if (backgroundType === 'color') {
     return {
@@ -87,6 +89,7 @@ const CommunityPage = () => {
   const { id } = useParams();
   const [community, setCommunity] = useState(null);
   const [listings, setListings] = useState([]);
+  const [isContactFormOpen, setIsContactFormOpen] = useState(false);
 
   // Define section background colors for consistent shape divider matching
   const sectionColors = {
@@ -94,7 +97,7 @@ const CommunityPage = () => {
     homes: '#ffffff', 
     builders: '#f8f9fa',
     listings: '#ffffff',
-    contact: '#f0f4f8'
+    contact: '#ffffff'
   };
 
   useEffect(() => {
@@ -203,173 +206,149 @@ const CommunityPage = () => {
   };
 
   return (
-    <div className="community-page">
-      {/* Hero Section */}
-      {community.sections.hero.visible && (
-        <motion.section 
-          className="hero"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-          // The inline style below must be last to override the default .hero CSS background
-          style={{
-            minHeight: '100vh',
-            height: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            textAlign: 'left',
-            position: 'relative',
-            padding: '0',
-            ...getHeroBackgroundStyle(community.sections.hero, community.image)
-          }}
-        >
-                        <div className="container" style={{ 
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'flex-start',
+    <>
+      <CommunityNavigation community={community} />
+      <div className="community-page">
+        {/* Hero Section */}
+        {community.sections.hero.visible && (
+          <motion.section 
+            className="hero-section"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+            style={{
               position: 'relative',
-              zIndex: 2
-            }}>
-              <h1 className="hero-title" style={{
-                fontSize: '3.5rem',
-                fontWeight: '800',
-                color: '#1a1a1a',
-                marginBottom: '1.5rem',
-                letterSpacing: '-0.02em',
-                lineHeight: '1.1'
-              }}>
-              {community.sections.hero.title || community.name}
-            </h1>
-              <p className="hero-subtitle" style={{
-                fontSize: '1.25rem',
-                color: '#666',
-                marginBottom: '3rem',
-                maxWidth: '600px',
-                lineHeight: '1.6',
-                fontWeight: '400'
-              }}>
-              {community.sections.hero.subtitle || community.description}
-            </p>
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-start', alignItems: 'center', flexWrap: 'wrap' }}>
-              <a
-                href="#homes"
-                style={{
-                  background: `linear-gradient(135deg, ${community.theme.primaryColor} 0%, ${UIUtils.darkenColor(community.theme.primaryColor, 0.15)} 100%)`,
-                  color: '#fff',
-                  textDecoration: 'none',
-                  padding: '1rem 2.5rem',
-                  borderRadius: community.theme.borderRadiusLarge,
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  boxShadow: `0 8px 30px ${community.theme.primaryColor}30`,
-                  transition: 'all 0.3s ease',
-                  display: 'inline-block'
-                }}
-              >
-                View Homes
-              </a>
-              <a 
-                href="#contact" 
-                style={{
-                  background: 'rgba(255,255,255,0.9)',
-                  color: '#1a1a1a',
-                  textDecoration: 'none',
-                  padding: '1rem 2.5rem',
-                  borderRadius: community.theme.borderRadiusLarge,
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  border: '2px solid rgba(0,0,0,0.1)',
-                  transition: 'all 0.3s ease',
-                  display: 'inline-block',
-                  backdropFilter: 'blur(10px)'
-                }}
-              >
-                Contact Us
-              </a>
-            </div>
-            
-            {/* Scroll indicator */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 1.5 }}
+              height: '90vh',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              padding: '0',
+              paddingTop: '80px', // Add padding to account for the fixed header
+              color: '#1D1D1F',
+              ...getHeroBackgroundStyle(community.sections.hero, community.image)
+            }}
+          >
+            <div 
+              className="container" 
               style={{
-                position: 'absolute',
-                bottom: '2rem',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '0.5rem',
-                zIndex: 10,
-                pointerEvents: 'none'
+                position: 'relative',
+                zIndex: 2,
+                maxWidth: '1400px',
+                margin: '0 auto',
+                paddingLeft: '5%',
+                paddingRight: '5%',
+                textAlign: 'left',
+                width: '100%'
               }}
             >
-              <span style={{ 
-                fontSize: '0.9rem', 
-                color: '#666', 
-                fontWeight: '500' 
-              }}>
-                Scroll to explore
-              </span>
-              <motion.div
-                animate={{ y: [0, 8, 0] }}
-                transition={{ 
-                  duration: 2, 
-                  repeat: Infinity, 
-                  ease: "easeInOut" 
-                }}
-                style={{
-                  width: '24px',
-                  height: '40px',
-                  border: '2px solid #666',
-                  borderRadius: '12px',
-                  position: 'relative'
-                }}
-              >
-                <motion.div
-                  animate={{ y: [0, 12, 0] }}
-                  transition={{ 
-                    duration: 2, 
-                    repeat: Infinity, 
-                    ease: "easeInOut" 
-                  }}
+              <div style={{ maxWidth: '650px', marginLeft: '0' }}>
+                <div 
                   style={{
-                    width: '4px',
-                    height: '8px',
-                    backgroundColor: community.theme.primaryColor,
-                    borderRadius: '2px',
-                    position: 'absolute',
-                    top: '4px',
-                    left: '50%',
-                    transform: 'translateX(-50%)'
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    borderRadius: '100px',
+                    padding: '6px 14px',
+                    marginBottom: '20px'
                   }}
-                />
-              </motion.div>
-            </motion.div>
-          </div>
-        </motion.section>
-      )}
-
-      {/* Premium About Section */}
-      {community.sections.about.visible && (
-        <motion.section 
-          className="community-about-section"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-          style={{ 
-            background: `linear-gradient(135deg, ${community.theme.primaryColor} 0%, ${UIUtils.darkenColor(community.theme.primaryColor, 0.15)} 100%)`,
-            position: 'relative',
-            overflow: 'hidden',
-            paddingTop: '10rem',
-            paddingBottom: '10rem'
-          }}
+                >
+                  <div 
+                    style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: community.theme.primaryColor,
+                      marginRight: '8px'
+                    }}
+                  />
+                  <span style={{ fontSize: '13px', fontWeight: '500' }}>Rivera Real Estate Group</span>
+                </div>
+                
+                <h1 
+                  style={{
+                    fontSize: 'clamp(2.5rem, 4vw, 3.5rem)',
+                    fontWeight: '700',
+                    lineHeight: '1.2',
+                    marginBottom: '20px',
+                    color: '#1D1D1F',
+                    letterSpacing: '-0.02em'
+                  }}
+                >
+                  {community.sections.hero.title || community.name}
+                </h1>
+                
+                <p 
+                  style={{
+                    fontSize: '16px',
+                    lineHeight: '1.6',
+                    marginBottom: '32px',
+                    maxWidth: '580px',
+                    color: '#4B4B4B'
+                  }}
+                >
+                  {community.sections.hero.subtitle || community.description}
+                </p>
+                
+                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-start', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <a
+                    href="#homes"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      backgroundColor: community.theme.primaryColor,
+                      color: 'white',
+                      padding: '14px 28px',
+                      borderRadius: '100px',
+                      fontWeight: '500',
+                      fontSize: '15px',
+                      textDecoration: 'none',
+                      boxShadow: `0 2px 10px rgba(0, 122, 255, 0.2)`
+                    }}
                   >
+                    <i className="fas fa-home" style={{ marginRight: '8px' }}></i>
+                    View Homes
+                  </a>
+                  <a 
+                    href="#contact" 
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      background: 'rgba(255,255,255,0.9)',
+                      color: '#1a1a1a',
+                      textDecoration: 'none',
+                      padding: '14px 28px',
+                      borderRadius: '100px',
+                      fontSize: '15px',
+                      fontWeight: '500',
+                      border: '2px solid rgba(0,0,0,0.1)',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    <i className="fas fa-phone" style={{ marginRight: '8px' }}></i>
+                    Contact Us
+                  </a>
+                </div>
+              </div>
+            </div>
+          </motion.section>
+        )}
+
+        {/* Premium About Section */}
+        {community.sections.about.visible && (
+          <motion.section 
+            className="community-about-section"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+            style={{ 
+              background: `linear-gradient(135deg, ${community.theme.primaryColor} 0%, ${UIUtils.darkenColor(community.theme.primaryColor, 0.15)} 100%)`,
+              position: 'relative',
+              overflow: 'hidden',
+              paddingTop: '10rem',
+              paddingBottom: '10rem'
+            }}
+          >
             {/* Custom colored curve divider for about to details transition */}
             <ShapeDivider 
               type="curve" 
@@ -475,7 +454,7 @@ const CommunityPage = () => {
             </div>
           </div>
         </motion.section>
-      )}
+        )}
 
 
 
@@ -676,7 +655,7 @@ const CommunityPage = () => {
           <div className="container" style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', maxWidth: '1200px' }}>
               {/* Home Models Section Header */}
-              <div className="community-section-header">
+              <div className="community-section-header" style={{ marginBottom: '3rem' }}>
                 <h2 style={{ 
                   fontSize: '2.5rem', 
                   fontWeight: '700', 
@@ -702,8 +681,10 @@ const CommunityPage = () => {
                 className="homes-grid"
                 style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
-                  gap: '2rem' 
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+                  gap: '2.5rem',
+                  maxWidth: '1000px',
+                  margin: '0 auto'
                 }}
                 variants={containerVariants}
                 initial="hidden"
@@ -746,7 +727,7 @@ const CommunityPage = () => {
           <div className="container" style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', maxWidth: '1200px' }}>
               {/* Builders Section Header */}
-              <div className="community-section-header">
+              <div className="community-section-header" style={{ marginBottom: '3rem' }}>
                 <h2 style={{ 
                   fontSize: '2.5rem', 
                   fontWeight: '700', 
@@ -771,8 +752,10 @@ const CommunityPage = () => {
               <motion.div 
                 style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
-                  gap: '2rem' 
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+                  gap: '2.5rem',
+                  maxWidth: '1000px',
+                  margin: '0 auto'
                 }}
                 variants={containerVariants}
                 initial="hidden"
@@ -799,15 +782,17 @@ const CommunityPage = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
           style={{ 
-            padding: '10rem 0 12rem 0', 
+            padding: '10rem 0 6rem 0', 
             backgroundColor: sectionColors.listings,
             position: 'relative'
           }}
         >
+          {/* No shape divider should be here since both listings and contact sections are white now */}
+          
           <div className="container" style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', maxWidth: '1200px' }}>
               {/* Listings Section Header */}
-              <div className="community-section-header">
+              <div className="community-section-header" style={{ marginBottom: '3rem' }}>
                 <h2 style={{ 
                   fontSize: '2.5rem', 
                   fontWeight: '700', 
@@ -832,8 +817,10 @@ const CommunityPage = () => {
               <motion.div 
                 style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', 
-                  gap: '2rem' 
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+                  gap: '2.5rem',
+                  maxWidth: '1000px',
+                  margin: '0 auto'
                 }}
                 variants={containerVariants}
                 initial="hidden"
@@ -860,8 +847,8 @@ const CommunityPage = () => {
         viewport={{ once: true }}
         transition={{ duration: 0.8 }}
         style={{ 
-          padding: '12rem 0 8rem 0',
-          backgroundColor: sectionColors.contact,
+          padding: '6rem 0 4rem 0',
+          background: `linear-gradient(135deg, ${community.theme.primaryColor} 0%, ${UIUtils.darkenColor(community.theme.primaryColor, 0.15)} 100%)`,
           position: 'relative'
         }}
       >
@@ -876,7 +863,7 @@ const CommunityPage = () => {
               style={{ 
                 fontSize: '2.5rem', 
                 fontWeight: '700', 
-                color: '#1a1a1a', 
+                color: '#ffffff', 
                 marginBottom: '1.5rem',
                 letterSpacing: '-0.02em',
                 transition: 'transform 0.3s ease',
@@ -892,7 +879,7 @@ const CommunityPage = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               style={{ 
                 fontSize: '1.1rem', 
-                color: '#666', 
+                color: 'rgba(255, 255, 255, 0.9)', 
                 marginBottom: '3rem',
                 lineHeight: '1.6',
                 textAlign: 'center'
@@ -910,35 +897,36 @@ const CommunityPage = () => {
               <button 
                 className="premium-cta-button"
                 style={{
-                  background: `linear-gradient(135deg, ${community.theme.primaryColor} 0%, ${UIUtils.darkenColor(community.theme.primaryColor, 0.15)} 100%)`,
-                  color: '#fff',
+                  background: '#ffffff',
+                  color: community.theme.primaryColor,
                   border: 'none',
                   padding: '1rem 2.5rem',
                   borderRadius: community.theme.borderRadiusLarge,
                   fontSize: '1rem',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  boxShadow: `0 8px 30px ${community.theme.primaryColor}30`,
+                  boxShadow: '0 8px 30px rgba(0, 0, 0, 0.15)',
                   transition: 'all 0.3s ease',
                   minWidth: '180px'
                 }}
                 onMouseEnter={(e) => {
                   e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = `0 12px 40px ${community.theme.primaryColor}40`;
+                  e.target.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.2)';
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = `0 8px 30px ${community.theme.primaryColor}30`;
+                  e.target.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.15)';
                 }}
               >
                 Schedule Visit
               </button>
               <button 
                 className="premium-secondary-button"
+                onClick={() => setIsContactFormOpen(true)}
                 style={{
-                  background: '#fff',
-                  color: community.theme.primaryColor,
-                  border: `2px solid ${community.theme.primaryColor}`,
+                  background: 'transparent',
+                  color: '#ffffff',
+                  border: '2px solid #ffffff',
                   padding: '1rem 2.5rem',
                   borderRadius: community.theme.borderRadiusLarge,
                   fontSize: '1rem',
@@ -948,13 +936,11 @@ const CommunityPage = () => {
                   minWidth: '180px'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = community.theme.primaryColor;
-                  e.target.style.color = '#fff';
+                  e.target.style.background = 'rgba(255, 255, 255, 0.1)';
                   e.target.style.transform = 'translateY(-2px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = '#fff';
-                  e.target.style.color = community.theme.primaryColor;
+                  e.target.style.background = 'transparent';
                   e.target.style.transform = 'translateY(0)';
                 }}
               >
@@ -965,6 +951,17 @@ const CommunityPage = () => {
         </div>
       </motion.section>
     </div>
+
+    {/* Contact Form Popup */}
+    {community && (
+      <ContactFormPopup 
+        isOpen={isContactFormOpen}
+        onClose={() => setIsContactFormOpen(false)}
+        communityName={community.name}
+        communityTheme={community.theme}
+      />
+    )}
+    </>
   );
 };
 
@@ -984,12 +981,15 @@ const HomeModelCard = ({ home, theme }) => {
         boxShadow: '0 4px 25px rgba(0,0,0,0.08)',
         border: '1px solid rgba(0,0,0,0.05)',
         overflow: 'hidden',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        maxWidth: '340px',
+        margin: '0 auto',
+        width: '100%'
       }}
     >
       {/* Image placeholder - could be enhanced with actual home images */}
       <div style={{ 
-        height: '200px', 
+        height: '180px', 
         background: `linear-gradient(135deg, ${theme.primaryColor}15 0%, ${theme.primaryColor}25 100%)`,
         display: 'flex',
         alignItems: 'center',
@@ -1013,10 +1013,10 @@ const HomeModelCard = ({ home, theme }) => {
         </div>
       </div>
       
-      <div style={{ padding: '2rem' }}>
-        <div style={{ marginBottom: '1.5rem' }}>
+      <div style={{ padding: '1.5rem' }}>
+        <div style={{ marginBottom: '1.25rem' }}>
           <h3 style={{ 
-            fontSize: '1.5rem',
+            fontSize: '1.3rem',
             fontWeight: '700',
             color: '#1a1a1a',
             marginBottom: '0.5rem'
@@ -1024,10 +1024,10 @@ const HomeModelCard = ({ home, theme }) => {
               {home.name}
             </h3>
           <div style={{ 
-            fontSize: '1.75rem',
+            fontSize: '1.5rem',
             fontWeight: '700',
             color: theme.primaryColor,
-            marginBottom: '1rem'
+            marginBottom: '0.75rem'
           }}>
             {typeof home.price === 'number' ? UIUtils.formatPrice(home.price) : home.price}
           </div>
@@ -1035,16 +1035,16 @@ const HomeModelCard = ({ home, theme }) => {
           
         <div style={{ 
           display: 'flex', 
-          gap: '0.75rem', 
+          gap: '0.5rem', 
           flexWrap: 'wrap',
-          marginBottom: '1.5rem'
+          marginBottom: '1.25rem'
         }}>
           <span style={{
             background: `${theme.primaryColor}10`,
             color: theme.primaryColor,
-            padding: '0.5rem 1rem',
-            borderRadius: '20px',
-            fontSize: '0.85rem',
+            padding: '0.4rem 0.8rem',
+            borderRadius: '16px',
+            fontSize: '0.8rem',
             fontWeight: '600',
             border: `1px solid ${theme.primaryColor}20`
           }}>
@@ -1053,9 +1053,9 @@ const HomeModelCard = ({ home, theme }) => {
           <span style={{
             background: `${theme.primaryColor}10`,
             color: theme.primaryColor,
-            padding: '0.5rem 1rem',
-            borderRadius: '20px',
-            fontSize: '0.85rem',
+            padding: '0.4rem 0.8rem',
+            borderRadius: '16px',
+            fontSize: '0.8rem',
             fontWeight: '600',
             border: `1px solid ${theme.primaryColor}20`
           }}>
@@ -1064,9 +1064,9 @@ const HomeModelCard = ({ home, theme }) => {
           <span style={{
             background: `${theme.primaryColor}10`,
             color: theme.primaryColor,
-            padding: '0.5rem 1rem',
-            borderRadius: '20px',
-            fontSize: '0.85rem',
+            padding: '0.4rem 0.8rem',
+            borderRadius: '16px',
+            fontSize: '0.8rem',
             fontWeight: '600',
             border: `1px solid ${theme.primaryColor}20`
           }}>
@@ -1110,12 +1110,15 @@ const BuilderCard = ({ builder, theme }) => {
         border: '1px solid rgba(0,0,0,0.05)',
         overflow: 'hidden',
         cursor: 'pointer',
-        position: 'relative'
+        position: 'relative',
+        maxWidth: '340px',
+        margin: '0 auto',
+        width: '100%'
       }}
     >
       {/* Builder logo/icon area */}
       <div style={{ 
-        height: '120px', 
+        height: '100px', 
         background: `linear-gradient(135deg, ${theme.primaryColor}08 0%, ${theme.primaryColor}15 100%)`,
         display: 'flex',
         alignItems: 'center',
@@ -1123,8 +1126,8 @@ const BuilderCard = ({ builder, theme }) => {
         position: 'relative'
       }}>
         <div style={{
-          width: '60px',
-          height: '60px',
+          width: '50px',
+          height: '50px',
           borderRadius: '50%',
           background: '#fff',
           display: 'flex',
@@ -1132,7 +1135,7 @@ const BuilderCard = ({ builder, theme }) => {
           justifyContent: 'center',
           boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
         }}>
-          <span style={{ fontSize: '1.8rem', color: theme.primaryColor }}>🏗️</span>
+          <span style={{ fontSize: '1.5rem', color: theme.primaryColor }}>🏗️</span>
         </div>
         <div style={{
           position: 'absolute',
@@ -1140,7 +1143,7 @@ const BuilderCard = ({ builder, theme }) => {
           right: '1rem',
           background: `${theme.primaryColor}`,
           color: '#fff',
-          borderRadius: '15px',
+          borderRadius: '12px',
           padding: '0.3rem 0.8rem',
           fontSize: '0.7rem',
           fontWeight: '600'
@@ -1149,32 +1152,32 @@ const BuilderCard = ({ builder, theme }) => {
         </div>
       </div>
       
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <div style={{ padding: '1.5rem', textAlign: 'center' }}>
         <h3 style={{ 
-          fontSize: '1.4rem',
+          fontSize: '1.3rem',
           fontWeight: '700',
           color: '#1a1a1a',
-          marginBottom: '1rem'
+          marginBottom: '0.75rem'
         }}>
               {builder.name}
             </h3>
         <p style={{ 
-          fontSize: '1rem',
+          fontSize: '0.9rem',
           color: '#666',
           lineHeight: '1.6',
-          marginBottom: '1.5rem'
+          marginBottom: '1.25rem'
         }}>
               {builder.description}
             </p>
           
           {builder.contact && (
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ marginBottom: '1.25rem' }}>
             <span style={{
               background: `${theme.primaryColor}10`,
               color: theme.primaryColor,
-              padding: '0.5rem 1rem',
-              borderRadius: '20px',
-              fontSize: '0.85rem',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '16px',
+              fontSize: '0.8rem',
               fontWeight: '600',
               border: `1px solid ${theme.primaryColor}20`
             }}>
@@ -1218,28 +1221,31 @@ const ListingCard = ({ listing, theme }) => {
         boxShadow: '0 4px 25px rgba(0,0,0,0.08)',
         border: '1px solid rgba(0,0,0,0.05)',
         overflow: 'hidden',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        maxWidth: '340px',
+        margin: '0 auto',
+        width: '100%'
       }}
     >
       <Link to={`/listing/${listing.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
         {/* Listing image placeholder */}
         <div style={{ 
-          height: '220px', 
+          height: '180px', 
           background: `linear-gradient(135deg, ${theme.primaryColor}12 0%, ${theme.primaryColor}20 100%)`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative'
         }}>
-          <span style={{ fontSize: '4rem', opacity: 0.5 }}>🏠</span>
+          <span style={{ fontSize: '3.5rem', opacity: 0.5 }}>🏠</span>
           <div style={{
             position: 'absolute',
             top: '1rem',
             left: '1rem',
             background: '#28a745',
             color: '#fff',
-            borderRadius: '20px',
-            padding: '0.4rem 1rem',
+            borderRadius: '16px',
+            padding: '0.4rem 0.8rem',
             fontSize: '0.8rem',
             fontWeight: '600'
           }}>
@@ -1251,8 +1257,8 @@ const ListingCard = ({ listing, theme }) => {
             right: '1rem',
             background: 'rgba(255,255,255,0.95)',
             backdropFilter: 'blur(10px)',
-            borderRadius: '20px',
-            padding: '0.4rem 1rem',
+            borderRadius: '16px',
+            padding: '0.4rem 0.8rem',
             fontSize: '0.8rem',
             fontWeight: '700',
             color: theme.primaryColor
@@ -1261,10 +1267,10 @@ const ListingCard = ({ listing, theme }) => {
           </div>
         </div>
         
-        <div style={{ padding: '2rem' }}>
-          <div style={{ marginBottom: '1.5rem' }}>
+        <div style={{ padding: '1.5rem' }}>
+          <div style={{ marginBottom: '1.25rem' }}>
             <h3 style={{ 
-              fontSize: '1.4rem',
+              fontSize: '1.3rem',
               fontWeight: '700',
               color: '#1a1a1a',
               marginBottom: '0.5rem'
@@ -1272,7 +1278,7 @@ const ListingCard = ({ listing, theme }) => {
                 {listing.title}
               </h3>
             <p style={{ 
-              fontSize: '1rem',
+              fontSize: '0.9rem',
               color: '#666',
               fontWeight: '500'
             }}>
@@ -1282,16 +1288,16 @@ const ListingCard = ({ listing, theme }) => {
             
           <div style={{ 
             display: 'flex', 
-            gap: '0.75rem', 
+            gap: '0.5rem', 
             flexWrap: 'wrap',
-            marginBottom: '1.5rem'
+            marginBottom: '1.25rem'
           }}>
             <span style={{
               background: `${theme.primaryColor}10`,
               color: theme.primaryColor,
-              padding: '0.5rem 1rem',
-              borderRadius: '20px',
-              fontSize: '0.85rem',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '16px',
+              fontSize: '0.8rem',
               fontWeight: '600',
               border: `1px solid ${theme.primaryColor}20`
             }}>
@@ -1300,9 +1306,9 @@ const ListingCard = ({ listing, theme }) => {
             <span style={{
               background: `${theme.primaryColor}10`,
               color: theme.primaryColor,
-              padding: '0.5rem 1rem',
-              borderRadius: '20px',
-              fontSize: '0.85rem',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '16px',
+              fontSize: '0.8rem',
               fontWeight: '600',
               border: `1px solid ${theme.primaryColor}20`
             }}>
@@ -1311,9 +1317,9 @@ const ListingCard = ({ listing, theme }) => {
             <span style={{
               background: `${theme.primaryColor}10`,
               color: theme.primaryColor,
-              padding: '0.5rem 1rem',
-              borderRadius: '20px',
-              fontSize: '0.85rem',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '16px',
+              fontSize: '0.8rem',
               fontWeight: '600',
               border: `1px solid ${theme.primaryColor}20`
             }}>
