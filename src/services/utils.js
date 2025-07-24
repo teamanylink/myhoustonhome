@@ -60,6 +60,25 @@ export class UIUtils {
     const toHex = (value) => value.toString(16).padStart(2, '0');
     return `#${toHex(lightR)}${toHex(lightG)}${toHex(lightB)}`;
   }
+
+  static getImageUrl(imagePath) {
+    if (!imagePath) {
+      return '/images/communities/default.jpg';
+    }
+    
+    // If it's already a full URL, return as is
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+    
+    // If it starts with a slash, it's already a root path
+    if (imagePath.startsWith('/')) {
+      return imagePath;
+    }
+    
+    // Otherwise, prepend the public path
+    return `/images/communities/${imagePath}`;
+  }
 }
 
 // Notification system for browser environments

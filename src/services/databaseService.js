@@ -10,7 +10,7 @@ export class DatabaseService {
   
   static async getCommunities() {
     try {
-      return await prisma.community.findMany({
+      const communities = await prisma.community.findMany({
         include: {
           builders: true,
           homes: true,
@@ -26,6 +26,9 @@ export class DatabaseService {
           name: 'asc'
         }
       });
+
+      // Return communities with native PostgreSQL types (no JSON parsing needed)
+      return communities;
     } catch (error) {
       console.error('Error fetching communities:', error);
       throw new Error('Failed to fetch communities');
@@ -34,7 +37,7 @@ export class DatabaseService {
 
   static async getCommunity(id) {
     try {
-      return await prisma.community.findUnique({
+      const community = await prisma.community.findUnique({
         where: { id },
         include: {
           builders: true,
@@ -50,6 +53,11 @@ export class DatabaseService {
           }
         }
       });
+
+      if (!community) return null;
+
+      // Return community with native PostgreSQL types (no JSON parsing needed)
+      return community;
     } catch (error) {
       console.error('Error fetching community:', error);
       throw new Error('Failed to fetch community');
@@ -58,11 +66,36 @@ export class DatabaseService {
 
   static async createCommunity(communityData) {
     try {
-      const { builders, homes, ...community } = communityData;
+      const { 
+        builders, 
+        homes, 
+        features, 
+        styling, 
+        mediaAssets, 
+        totalHomes,
+        ...community 
+      } = communityData;
+      
+      // Map frontend fields to database schema (PostgreSQL native types)
+      const mappedData = {
+        ...community,
+        // Map features to amenities (native array)
+        amenities: features || [],
+        // Map styling to theme with mediaAssets (native JSON)
+        theme: {
+          ...(styling || {}),
+          mediaAssets: mediaAssets || []
+        },
+        // Handle other field mappings (native types)
+        sections: community.sections || {},
+        schools: community.schools || [],
+        references: community.references || [],
+        priceRange: community.priceRange || '',
+      };
       
       return await prisma.community.create({
         data: {
-          ...community,
+          ...mappedData,
           builders: builders ? {
             create: builders
           } : undefined,
@@ -83,9 +116,43 @@ export class DatabaseService {
 
   static async updateCommunity(id, updateData) {
     try {
+      const { 
+        features, 
+        styling, 
+        mediaAssets, 
+        totalHomes,
+        builders,   // Exclude builders from main update
+        homes,      // Exclude homes from main update
+        _count,     // Exclude Prisma count metadata
+        ...community 
+      } = updateData;
+      
+      // Get existing community to merge theme data
+      const existing = await prisma.community.findUnique({ where: { id } });
+      const existingTheme = existing?.theme || {};
+      
+      // Map frontend fields to database schema (PostgreSQL native types)
+      const mappedData = {
+        ...community,
+        // Map features to amenities (native array if provided)
+        ...(features !== undefined && { amenities: features }),
+        // Map styling to theme with mediaAssets (merge with existing theme)
+        ...(styling !== undefined || mediaAssets !== undefined) && {
+          theme: {
+            ...existingTheme,
+            ...(styling || {}),
+            ...(mediaAssets !== undefined && { mediaAssets })
+          }
+        },
+        // Handle other native fields
+        ...(community.sections !== undefined && { sections: community.sections }),
+        ...(community.schools !== undefined && { schools: community.schools }),
+        ...(community.references !== undefined && { references: community.references })
+      };
+      
       return await prisma.community.update({
         where: { id },
-        data: updateData,
+        data: mappedData,
         include: {
           builders: true,
           homes: true
@@ -286,7 +353,7 @@ export class DatabaseService {
       }
       if (filters.minBedrooms) where.bedrooms = { gte: filters.minBedrooms };
       
-      return await prisma.listing.findMany({
+      const listings = await prisma.listing.findMany({
         where,
         include: {
           community: true
@@ -297,6 +364,9 @@ export class DatabaseService {
           { createdAt: 'desc' }
         ]
       });
+
+      // Return listings with native PostgreSQL types (no JSON parsing needed)
+      return listings;
     } catch (error) {
       console.error('Error fetching listings:', error);
       throw new Error('Failed to fetch listings');
@@ -305,12 +375,17 @@ export class DatabaseService {
 
   static async getListing(id) {
     try {
-      return await prisma.listing.findUnique({
+      const listing = await prisma.listing.findUnique({
         where: { id },
         include: {
           community: true
         }
       });
+
+      if (!listing) return null;
+
+      // Return listing with native PostgreSQL types (no JSON parsing needed)
+      return listing;
     } catch (error) {
       console.error('Error fetching listing:', error);
       throw new Error('Failed to fetch listing');
@@ -319,12 +394,15 @@ export class DatabaseService {
 
   static async createListing(listingData) {
     try {
-      return await prisma.listing.create({
+      // Use native PostgreSQL array types (no serialization needed)
+      const listing = await prisma.listing.create({
         data: listingData,
         include: {
           community: true
         }
       });
+
+      return listing;
     } catch (error) {
       console.error('Error creating listing:', error);
       throw new Error('Failed to create listing');
@@ -333,13 +411,16 @@ export class DatabaseService {
 
   static async updateListing(id, updateData) {
     try {
-      return await prisma.listing.update({
+      // Use native PostgreSQL array types (no serialization needed)
+      const listing = await prisma.listing.update({
         where: { id },
         data: updateData,
         include: {
           community: true
         }
       });
+
+      return listing;
     } catch (error) {
       console.error('Error updating listing:', error);
       throw new Error('Failed to update listing');
