@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import apiService from '../../services/apiService';
 import { DataService } from '../../services/apiService';
@@ -19,9 +19,9 @@ const Dashboard = () => {
 
   useEffect(() => {
     loadDashboardData();
-  }, []);
+  }, [loadDashboardData]);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -102,7 +102,7 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // Empty dependency array to prevent infinite loops
 
   if (loading) {
     return (
