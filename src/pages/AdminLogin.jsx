@@ -16,9 +16,17 @@ const AdminLogin = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // Check if user just logged out (no token in localStorage)
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+          setIsLoading(false);
+          return;
+        }
+        
         await apiService.verifyToken();
         navigate('/admin/dashboard');
       } catch (error) {
+        console.log('🔐 Auth check failed, staying on login page');
         setIsLoading(false);
       }
     };

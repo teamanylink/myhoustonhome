@@ -90,6 +90,8 @@ const CommunityPage = () => {
   const [community, setCommunity] = useState(null);
   const [listings, setListings] = useState([]);
   const [isContactFormOpen, setIsContactFormOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   // Define section background colors for consistent shape divider matching
   const sectionColors = {
@@ -102,6 +104,8 @@ const CommunityPage = () => {
 
   useEffect(() => {
     const loadCommunityData = async () => {
+      setLoading(true);
+      setError(false);
       console.log(`🔍 Loading community data for ID: ${id}`);
       
       // Try to get community from cache first for instant loading
@@ -145,12 +149,16 @@ const CommunityPage = () => {
         }
         
         // Set theme variables
-          const root = document.documentElement;
-          root.style.setProperty('--community-primary-color', foundCommunity.theme.primaryColor);
-          root.style.setProperty('--community-primary-dark', UIUtils.darkenColor(foundCommunity.theme.primaryColor, 0.2));
-          root.style.setProperty('--radius-dynamic', foundCommunity.theme.borderRadius);
-          root.style.setProperty('--radius-dynamic-large', foundCommunity.theme.borderRadiusLarge);
+        const root = document.documentElement;
+        root.style.setProperty('--community-primary-color', foundCommunity.theme.primaryColor);
+        root.style.setProperty('--community-primary-dark', UIUtils.darkenColor(foundCommunity.theme.primaryColor, 0.2));
+        root.style.setProperty('--radius-dynamic', foundCommunity.theme.borderRadius);
+        root.style.setProperty('--radius-dynamic-large', foundCommunity.theme.borderRadiusLarge);
+      } else {
+        setError(true);
       }
+      
+      setLoading(false);
     };
 
     loadCommunityData();
@@ -165,7 +173,36 @@ const CommunityPage = () => {
     };
   }, [id]);
 
-  if (!community) {
+  if (loading) {
+    return (
+      <div className="container section" style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        paddingTop: '0',
+        paddingBottom: '0'
+      }}>
+        <div className="text-center space-y-6">
+          <div style={{ 
+            width: '48px', 
+            height: '48px', 
+            border: '4px solid rgba(0, 122, 255, 0.1)', 
+            borderLeftColor: 'var(--primary-color)', 
+            borderRadius: '50%', 
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 24px'
+          }} />
+          <h1 className="text-title-1">Loading Community</h1>
+          <p className="text-body text-secondary">
+            Please wait while we load the community information...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !community) {
     return (
       <div className="container section">
         <div className="text-center space-y-4">

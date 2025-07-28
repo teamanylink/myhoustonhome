@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { DataService } from '../services/dataService';
+import { DataService } from '../services/apiService';
 
 const CommunitiesPage = () => {
   const [communities, setCommunities] = useState([]);
@@ -11,24 +11,32 @@ const CommunitiesPage = () => {
     const loadCommunities = async () => {
       try {
         setLoading(true);
-        // Try to load from API first
-        try {
-          const response = await fetch('/api/communities');
-          if (response.ok) {
-            const data = await response.json();
-            setCommunities(data);
-            setLoading(false);
-            return;
-          }
-        } catch (error) {
-          console.log('API not available, falling back to local data');
+        console.log('🔄 Loading communities...');
+        
+        const communitiesData = await DataService.getCommunities();
+        console.log('📋 Communities loaded:', communitiesData);
+        
+        setCommunities(communitiesData || []);
+        
+        // If no communities loaded, force initialize example data
+        if (!communitiesData || communitiesData.length === 0) {
+          console.log('🚨 No communities found, force initializing localStorage...');
+          const { initializeExampleData } = await import('../services/exampleData.js');
+          initializeExampleData();
+          
+          // Try loading again from localStorage
+          const fallbackCommunities = DataService.getCommunitiesFromLocalStorage();
+          console.log('📦 Fallback communities:', fallbackCommunities);
+          setCommunities(fallbackCommunities || []);
         }
-
-        // Fallback to local data
-        const localCommunities = DataService.getCommunities();
-        setCommunities(localCommunities);
       } catch (error) {
-        console.error('Error loading communities:', error);
+        console.error('❌ Error loading communities:', error);
+        
+        // Force fallback to localStorage
+        console.log('🔄 Falling back to localStorage...');
+        const fallbackCommunities = DataService.getCommunitiesFromLocalStorage();
+        console.log('📦 localStorage communities:', fallbackCommunities);
+        setCommunities(fallbackCommunities || []);
       } finally {
         setLoading(false);
       }

@@ -40,10 +40,6 @@ const HomePage = () => {
           setCommunities(fallbackCommunities || []);
           setListings(fallbackListings || []);
         }
-        
-        // Preload all community details for instant access
-        console.log('🚀 Preloading community details...');
-        await DataService.preloadAllCommunities();
       } catch (error) {
         console.error('❌ Error loading data:', error);
         
@@ -61,33 +57,6 @@ const HomePage = () => {
     
     loadData();
   }, []);
-
-  // Initialize example data only if no communities exist
-  useEffect(() => {
-    if (!loading && communities.length === 0) {
-      console.log('🏗️ No communities found, initializing example data...');
-      DataService.initializeExampleData().then(() => {
-        console.log('✅ Example data initialized, reloading...');
-        // Reload data after initialization
-        const reloadData = async () => {
-          const [communitiesData, listingsData] = await Promise.all([
-            DataService.getCommunities(),
-            DataService.getListings()
-          ]);
-          console.log('🔄 Reloaded communities:', communitiesData);
-          console.log('🔄 Reloaded listings:', listingsData);
-          setCommunities(communitiesData || []);
-          setListings(listingsData || []);
-          
-          // Preload all community details for instant access after reload
-          await DataService.preloadAllCommunities();
-        };
-        reloadData();
-      }).catch(error => {
-        console.error('Error initializing example data:', error);
-      });
-    }
-  }, [loading, communities.length]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -208,6 +177,16 @@ const HomePage = () => {
             
             <Link 
               to="#communities" 
+              onClick={(e) => {
+                e.preventDefault();
+                const element = document.getElementById('communities');
+                if (element) {
+                  element.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                  });
+                }
+              }}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -721,7 +700,12 @@ const HomePage = () => {
           </div>
 
           <motion.div 
-            className="grid grid-cols-3"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '32px',
+              marginTop: '48px'
+            }}
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"

@@ -18,9 +18,9 @@ import AdminLogin from './pages/AdminLogin.jsx';
 import DashboardLayout from './components/admin/DashboardLayout.jsx';
 import Dashboard from './pages/admin/Dashboard.jsx';
 import Communities from './pages/admin/Communities.jsx';
-import Properties from './pages/admin/Properties.jsx';
 import Listings from './pages/admin/Listings.jsx';
 import Settings from './pages/admin/Settings.jsx';
+import AdminUsers from './pages/admin/AdminUsers.jsx';
 
 function App() {
   return (
@@ -78,9 +78,9 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="communities" element={<Communities />} />
-            <Route path="properties" element={<Properties />} />
             <Route path="listings" element={<Listings />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="admin-users" element={<AdminUsers />} />
           </Route>
         </Routes>
       </div>

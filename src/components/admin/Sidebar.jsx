@@ -8,7 +8,8 @@ import {
   FileText,
   Settings,
   Menu,
-  X
+  X,
+  Users
 } from 'lucide-react';
 
 const Sidebar = ({ collapsed, onToggle }) => {
@@ -27,14 +28,14 @@ const Sidebar = ({ collapsed, onToggle }) => {
       icon: Building
     },
     {
-      name: 'Properties',
-      href: '/admin/properties',
-      icon: MapPin
-    },
-    {
       name: 'Listings',
       href: '/admin/listings',
       icon: FileText
+    },
+    {
+      name: 'Admin Users',
+      href: '/admin/admin-users',
+      icon: Users
     },
     {
       name: 'Settings',

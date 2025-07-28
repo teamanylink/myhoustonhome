@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import apiService from '../../services/apiService'; // Added import for apiService
 
 const DashboardLayout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -18,7 +20,10 @@ const DashboardLayout = () => {
     }
 
     try {
-      setUser(JSON.parse(userData));
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+      console.log('🔍 Current user:', parsedUser);
+      console.log('🔍 User role:', parsedUser.role);
     } catch (error) {
       console.error('Error parsing user data:', error);
       navigate('/admin/login');
@@ -26,9 +31,32 @@ const DashboardLayout = () => {
   }, [navigate]);
 
   const handleLogout = () => {
+    console.log('🚪 Logging out...');
+    console.log('🚪 Current user:', user);
+    console.log('🚪 Current token:', localStorage.getItem('adminToken'));
+    
+    // Set loading state
+    setIsLoggingOut(true);
+    
+    // Clear local storage
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUser');
-    navigate('/admin/login');
+    
+    // Clear API service token
+    apiService.logout();
+    
+    // Clear user state
+    setUser(null);
+    
+    console.log('🚪 After logout - token:', localStorage.getItem('adminToken'));
+    console.log('🚪 After logout - user:', localStorage.getItem('adminUser'));
+    console.log('🚪 Redirecting to login page...');
+    
+    // Small delay to ensure state is cleared, then navigate
+    setTimeout(() => {
+      console.log('🚪 Executing navigation to /admin/login');
+      navigate('/admin/login', { replace: true });
+    }, 100);
   };
 
   const navItems = [
@@ -43,14 +71,15 @@ const DashboardLayout = () => {
       icon: '🏘️'
     },
     {
-      path: '/admin/properties',
-      name: 'Properties',
-      icon: '🏠'
-    },
-    {
       path: '/admin/listings',
       name: 'Listings',
       icon: '📝'
+    },
+    {
+      path: '/admin/admin-users',
+      name: 'Admin Users',
+      icon: '👥',
+      requiresSuperAdmin: true
     },
     {
       path: '/admin/settings',
@@ -80,7 +109,13 @@ const DashboardLayout = () => {
         </div>
 
         <nav className="admin-sidebar-nav">
-          {navItems.map((item) => (
+          {navItems
+            .filter(item => {
+              const shouldShow = !item.requiresSuperAdmin || user.role === 'super_admin';
+              console.log(`🔍 Nav item "${item.name}": requiresSuperAdmin=${item.requiresSuperAdmin}, user.role=${user.role}, shouldShow=${shouldShow}`);
+              return shouldShow;
+            })
+            .map((item) => (
             <a
               key={item.path}
               href={item.path}
@@ -99,16 +134,20 @@ const DashboardLayout = () => {
           <button
             className="admin-nav-link"
             onClick={handleLogout}
+            disabled={isLoggingOut}
             style={{
               background: 'none',
               border: 'none',
               width: '100%',
               textAlign: 'left',
-              marginTop: 'var(--spacing-6)'
+              marginTop: 'var(--spacing-6)',
+              opacity: isLoggingOut ? 0.6 : 1
             }}
           >
-            <span className="admin-nav-icon">🚪</span>
-            <span>Logout</span>
+            <span className="admin-nav-icon">
+              {isLoggingOut ? '⏳' : '🚪'}
+            </span>
+            <span>{isLoggingOut ? 'Logging out...' : 'Logout'}</span>
           </button>
         </nav>
       </div>
@@ -138,8 +177,19 @@ const DashboardLayout = () => {
 
           <div className="admin-header-actions">
             <span className="text-secondary">Welcome, {user.email}</span>
-            <button className="btn btn-secondary" onClick={handleLogout}>
-              Logout
+            <button 
+              className="btn btn-secondary" 
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+            >
+              {isLoggingOut ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Logging out...
+                </>
+              ) : (
+                'Logout'
+              )}
             </button>
           </div>
         </header>

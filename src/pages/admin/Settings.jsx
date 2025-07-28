@@ -23,6 +23,12 @@ const Settings = () => {
   });
   const [loading, setLoading] = useState(false);
   const [saveStatus, setSaveStatus] = useState('');
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordErrors, setPasswordErrors] = useState({});
 
   const handleSave = async (section) => {
     setLoading(true);
@@ -51,10 +57,49 @@ const Settings = () => {
     }));
   };
 
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    
+    // Validate password form
+    const errors = {};
+    if (!passwordData.currentPassword) errors.currentPassword = 'Current password is required';
+    if (!passwordData.newPassword) errors.newPassword = 'New password is required';
+    if (passwordData.newPassword.length < 8) {
+      errors.newPassword = 'New password must be at least 8 characters';
+    }
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+    
+    if (Object.keys(errors).length > 0) {
+      setPasswordErrors(errors);
+      return;
+    }
+
+    setLoading(true);
+    setPasswordErrors({});
+    
+    try {
+      await apiService.request('/admin/change-password', 'POST', {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
+      
+      setSaveStatus('Password changed successfully!');
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setTimeout(() => setSaveStatus(''), 3000);
+    } catch (error) {
+      setPasswordErrors({ submit: error.message || 'Failed to change password' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const tabs = [
     { id: 'general', name: 'General', icon: '⚙️' },
     { id: 'appearance', name: 'Appearance', icon: '🎨' },
-    { id: 'seo', name: 'SEO', icon: '🔍' }
+    { id: 'seo', name: 'SEO', icon: '🔍' },
+    { id: 'password', name: 'Password', icon: '🔐' }
   ];
 
   return (
@@ -261,6 +306,71 @@ const Settings = () => {
               >
                 {loading ? 'Saving...' : 'Save SEO Settings'}
               </button>
+            </div>
+          )}
+
+          {activeTab === 'password' && (
+            <div className="space-y-6">
+              <h2 className="text-title-2 font-semibold text-primary">Change Password</h2>
+              
+              <form onSubmit={handlePasswordChange} className="space-y-4">
+                <div className="form-group">
+                  <label className="form-label">Current Password</label>
+                  <input
+                    type="password"
+                    className={`form-input ${passwordErrors.currentPassword ? 'border-error' : ''}`}
+                    value={passwordData.currentPassword}
+                    onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                    placeholder="Enter your current password"
+                  />
+                  {passwordErrors.currentPassword && (
+                    <p className="text-error text-sm mt-1">{passwordErrors.currentPassword}</p>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">New Password</label>
+                  <input
+                    type="password"
+                    className={`form-input ${passwordErrors.newPassword ? 'border-error' : ''}`}
+                    value={passwordData.newPassword}
+                    onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                    placeholder="Enter your new password"
+                  />
+                  {passwordErrors.newPassword && (
+                    <p className="text-error text-sm mt-1">{passwordErrors.newPassword}</p>
+                  )}
+                  <p className="text-sm text-tertiary mt-1">Minimum 8 characters</p>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Confirm New Password</label>
+                  <input
+                    type="password"
+                    className={`form-input ${passwordErrors.confirmPassword ? 'border-error' : ''}`}
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                    placeholder="Confirm your new password"
+                  />
+                  {passwordErrors.confirmPassword && (
+                    <p className="text-error text-sm mt-1">{passwordErrors.confirmPassword}</p>
+                  )}
+                </div>
+
+                {passwordErrors.submit && (
+                  <div className="p-4 rounded-xl bg-error-color bg-opacity-10 border border-error-color border-opacity-20">
+                    <p className="text-error text-sm">{passwordErrors.submit}</p>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={loading}
+                >
+                  {loading ? 'Changing Password...' : 'Change Password'}
+                </button>
+              </form>
             </div>
           )}
         </div>
