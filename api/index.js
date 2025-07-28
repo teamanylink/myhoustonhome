@@ -99,6 +99,23 @@ app.post('/api/admin/login', async (req, res) => {
         admins.push(admin);
         console.log('✅ Default admin created: denis@denvagroup.com');
       }
+      
+      // Handle default admin login
+      const token = jwt.sign(
+        { adminId: admin.id, email: admin.email, role: admin.role },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+      
+      res.json({
+        token,
+        admin: {
+          id: admin.id,
+          email: admin.email,
+          role: admin.role
+        }
+      });
+      return;
     } else {
       // Regular login flow
       const admin = admins.find(a => a.email.toLowerCase() === email.toLowerCase() && a.isActive);
@@ -127,24 +144,7 @@ app.post('/api/admin/login', async (req, res) => {
           role: admin.role
         }
       });
-      return;
     }
-    
-    // Handle default admin login
-    const token = jwt.sign(
-      { adminId: admin.id, email: admin.email, role: admin.role },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-    
-    res.json({
-      token,
-      admin: {
-        id: admin.id,
-        email: admin.email,
-        role: admin.role
-      }
-    });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error.' });
