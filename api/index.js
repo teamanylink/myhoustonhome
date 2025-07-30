@@ -395,6 +395,77 @@ app.delete('/api/listings/:id', authenticateAdmin, async (req, res) => {
   }
 });
 
+// ===== PROTECTED PROPERTY ROUTES =====
+app.get('/api/properties', authenticateAdmin, async (req, res) => {
+  try {
+    const properties = await DatabaseService.getProperties();
+    res.json(properties);
+  } catch (error) {
+    console.error('Error fetching properties:', error);
+    res.status(500).json({ error: 'Failed to fetch properties' });
+  }
+});
+
+app.get('/api/properties/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const property = await DatabaseService.getProperty(req.params.id);
+    if (!property) {
+      return res.status(404).json({ error: 'Property not found' });
+    }
+    res.json(property);
+  } catch (error) {
+    console.error('Error fetching property:', error);
+    res.status(500).json({ error: 'Failed to fetch property' });
+  }
+});
+
+app.post('/api/properties', authenticateAdmin, async (req, res) => {
+  try {
+    const propertyData = {
+      id: `property-${Date.now()}`,
+      ...req.body,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const property = await DatabaseService.createProperty(propertyData);
+    res.status(201).json(property);
+  } catch (error) {
+    console.error('Error creating property:', error);
+    res.status(500).json({ error: 'Failed to create property' });
+  }
+});
+
+app.put('/api/properties/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const propertyData = {
+      ...req.body,
+      id: req.params.id,
+      updatedAt: new Date().toISOString()
+    };
+    const property = await DatabaseService.updateProperty(req.params.id, propertyData);
+    if (!property) {
+      return res.status(404).json({ error: 'Property not found' });
+    }
+    res.json(property);
+  } catch (error) {
+    console.error('Error updating property:', error);
+    res.status(500).json({ error: 'Failed to update property' });
+  }
+});
+
+app.delete('/api/properties/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const success = await DatabaseService.deleteProperty(req.params.id);
+    if (!success) {
+      return res.status(404).json({ error: 'Property not found' });
+    }
+    res.json({ message: 'Property deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting property:', error);
+    res.status(500).json({ error: 'Failed to delete property' });
+  }
+});
+
 // ===== PROTECTED CONTACT ROUTES =====
 app.get('/api/contacts', authenticateAdmin, async (req, res) => {
   try {

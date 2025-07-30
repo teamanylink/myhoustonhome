@@ -19,6 +19,7 @@ import DashboardLayout from './components/admin/DashboardLayout.jsx';
 import Dashboard from './pages/admin/Dashboard.jsx';
 import Communities from './pages/admin/Communities.jsx';
 import Listings from './pages/admin/Listings.jsx';
+import Properties from './pages/admin/Properties.jsx';
 import Settings from './pages/admin/Settings.jsx';
 import AdminUsers from './pages/admin/AdminUsers.jsx';
 
@@ -79,6 +80,7 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="communities" element={<Communities />} />
             <Route path="listings" element={<Listings />} />
+            <Route path="properties" element={<Properties />} />
             <Route path="settings" element={<Settings />} />
             <Route path="admin-users" element={<AdminUsers />} />
           </Route>

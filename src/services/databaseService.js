@@ -438,6 +438,66 @@ export class DatabaseService {
     }
   }
 
+  // ===== PROPERTY METHODS =====
+
+  static async getProperties() {
+    try {
+      return await prisma.property.findMany({
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching properties:', error);
+      throw new Error('Failed to fetch properties');
+    }
+  }
+
+  static async getProperty(id) {
+    try {
+      return await prisma.property.findUnique({
+        where: { id }
+      });
+    } catch (error) {
+      console.error('Error fetching property:', error);
+      throw new Error('Failed to fetch property');
+    }
+  }
+
+  static async createProperty(propertyData) {
+    try {
+      return await prisma.property.create({
+        data: propertyData
+      });
+    } catch (error) {
+      console.error('Error creating property:', error);
+      throw new Error('Failed to create property');
+    }
+  }
+
+  static async updateProperty(id, updateData) {
+    try {
+      return await prisma.property.update({
+        where: { id },
+        data: updateData
+      });
+    } catch (error) {
+      console.error('Error updating property:', error);
+      throw new Error('Failed to update property');
+    }
+  }
+
+  static async deleteProperty(id) {
+    try {
+      return await prisma.property.delete({
+        where: { id }
+      });
+    } catch (error) {
+      console.error('Error deleting property:', error);
+      throw new Error('Failed to delete property');
+    }
+  }
+
   // ===== CONTACT METHODS =====
 
   static async getContacts() {

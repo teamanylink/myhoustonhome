@@ -140,6 +140,13 @@ class ApiService {
   async updateListing(id, data) { return this.request(`/listings/${id}`, { method: 'PUT', body: data }); }
   async deleteListing(id) { return this.request(`/listings/${id}`, { method: 'DELETE' }); }
 
+  // ===== PROPERTY METHODS =====
+  async getProperties() { return this.request('/properties'); }
+  async getProperty(id) { return this.request(`/properties/${id}`); }
+  async createProperty(data) { return this.request('/properties', { method: 'POST', body: data }); }
+  async updateProperty(id, data) { return this.request(`/properties/${id}`, { method: 'PUT', body: data }); }
+  async deleteProperty(id) { return this.request(`/properties/${id}`, { method: 'DELETE' }); }
+
   // ===== CONTACT METHODS =====
   async getContacts() { return this.request('/contacts'); }
   async createContact(data) { return this.request('/contacts', { method: 'POST', body: data }); }
@@ -424,6 +431,65 @@ export class DataService {
     }
   }
 
+  // ===== PROPERTY METHODS =====
+  static async getProperties() {
+    try {
+      return await apiService.getProperties();
+    } catch (error) {
+      console.error('API getProperties failed:', error.message);
+      return this.getPropertiesFromLocalStorage();
+    }
+  }
+
+  static async getProperty(id) {
+    try {
+      return await apiService.getProperty(id);
+    } catch (error) {
+      console.error('API getProperty failed:', error.message);
+      return this.getPropertyFromLocalStorage(id);
+    }
+  }
+
+  static async getAdminProperties() {
+    try {
+      return await apiService.getProperties();
+    } catch (error) {
+      console.error('API getAdminProperties failed:', error.message);
+      throw error;
+    }
+  }
+
+  static async getAdminProperty(id) {
+    try {
+      return await apiService.getProperty(id);
+    } catch (error) {
+      console.error('API getAdminProperty failed:', error.message);
+      throw error;
+    }
+  }
+
+  static async saveProperty(property) {
+    try {
+      if (property.id && await apiService.getProperty(property.id)) {
+        return await apiService.updateProperty(property.id, property);
+      } else {
+        return await apiService.createProperty(property);
+      }
+    } catch (error) {
+      console.error('API saveProperty failed:', error.message);
+      return this.savePropertyToLocalStorage(property);
+    }
+  }
+
+  static async deleteProperty(id) {
+    try {
+      return await apiService.deleteProperty(id);
+    } catch (error) {
+      console.error('API deleteProperty failed:', error.message);
+      return this.deletePropertyFromLocalStorage(id);
+    }
+  }
+
   // ===== CONTACT METHODS =====
   static async getContacts() {
     try {
@@ -553,6 +619,35 @@ export class DataService {
   static getListingsByCommunityFromLocalStorage(communityId) {
     const listings = this.getListingsFromLocalStorage();
     return listings.filter(listing => listing.communityId === communityId);
+  }
+
+  static getPropertiesFromLocalStorage() {
+    return JSON.parse(localStorage.getItem('properties') || '[]');
+  }
+
+  static getPropertyFromLocalStorage(id) {
+    const properties = this.getPropertiesFromLocalStorage();
+    return properties.find(property => property.id === id);
+  }
+
+  static savePropertyToLocalStorage(property) {
+    const properties = this.getPropertiesFromLocalStorage();
+    const index = properties.findIndex(p => p.id === property.id);
+    
+    if (index >= 0) {
+      properties[index] = property;
+    } else {
+      properties.push(property);
+    }
+    
+    localStorage.setItem('properties', JSON.stringify(properties));
+    return property;
+  }
+
+  static deletePropertyFromLocalStorage(id) {
+    const properties = this.getPropertiesFromLocalStorage();
+    const filtered = properties.filter(p => p.id !== id);
+    localStorage.setItem('properties', JSON.stringify(filtered));
   }
 
   static getContactsFromLocalStorage() {

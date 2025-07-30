@@ -96,6 +96,28 @@ model Listing {
   @@map("listings")
 }
 
+model Property {
+  id           String        @id @default(cuid())
+  title        String
+  address      String
+  city         String
+  state        String
+  zipCode      String
+  price        Float
+  bedrooms     Int
+  bathrooms    Float
+  squareFeet   Int
+  description  String?       @db.Text
+  propertyType PropertyType  @default(SINGLE_FAMILY)
+  status       PropertyStatus @default(AVAILABLE)
+  images       String[]      // Array of image URLs
+  features     String[]      // Array of features
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@map("properties")
+}
+
 model Contact {
   id        String   @id @default(cuid())
   name      String
@@ -120,4 +142,19 @@ enum ListingStatus {
   PENDING
   SOLD
   UNAVAILABLE
+}
+
+enum PropertyType {
+  SINGLE_FAMILY
+  TOWNHOUSE
+  CONDO
+  MULTI_FAMILY
+  LAND
+}
+
+enum PropertyStatus {
+  AVAILABLE
+  PENDING
+  SOLD
+  OFF_MARKET
 }

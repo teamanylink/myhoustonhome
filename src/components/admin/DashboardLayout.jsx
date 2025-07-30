@@ -76,6 +76,11 @@ const DashboardLayout = () => {
       icon: '📝'
     },
     {
+      path: '/admin/properties',
+      name: 'Properties',
+      icon: '🏠'
+    },
+    {
       path: '/admin/admin-users',
       name: 'Admin Users',
       icon: '👥',
