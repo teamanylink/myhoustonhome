@@ -22,8 +22,6 @@ const DashboardLayout = () => {
     try {
       const parsedUser = JSON.parse(userData);
       setUser(parsedUser);
-      console.log('🔍 Current user:', parsedUser);
-      console.log('🔍 User role:', parsedUser.role);
     } catch (error) {
       console.error('Error parsing user data:', error);
       navigate('/admin/login');
@@ -31,10 +29,6 @@ const DashboardLayout = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    console.log('🚪 Logging out...');
-    console.log('🚪 Current user:', user);
-    console.log('🚪 Current token:', localStorage.getItem('adminToken'));
-    
     // Set loading state
     setIsLoggingOut(true);
     
@@ -48,13 +42,8 @@ const DashboardLayout = () => {
     // Clear user state
     setUser(null);
     
-    console.log('🚪 After logout - token:', localStorage.getItem('adminToken'));
-    console.log('🚪 After logout - user:', localStorage.getItem('adminUser'));
-    console.log('🚪 Redirecting to login page...');
-    
     // Small delay to ensure state is cleared, then navigate
     setTimeout(() => {
-      console.log('🚪 Executing navigation to /admin/login');
       navigate('/admin/login', { replace: true });
     }, 100);
   };
@@ -117,7 +106,6 @@ const DashboardLayout = () => {
           {navItems
             .filter(item => {
               const shouldShow = !item.requiresSuperAdmin || user.role === 'super_admin';
-              console.log(`🔍 Nav item "${item.name}": requiresSuperAdmin=${item.requiresSuperAdmin}, user.role=${user.role}, shouldShow=${shouldShow}`);
               return shouldShow;
             })
             .map((item) => (

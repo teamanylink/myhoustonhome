@@ -35,7 +35,7 @@ const Dashboard = () => {
         });
 
         // Update stats
-        setStats({
+        const newStats = {
           totalCommunities: communities.length,
           totalListings: listings.length,
           totalProperties: properties.length,
@@ -59,7 +59,10 @@ const Dashboard = () => {
               id: p.id 
             }))
           ].slice(-5)
-        });
+        };
+        
+        console.log('📊 Setting dashboard stats:', newStats);
+        setStats(newStats);
         
         setLastUpdated(new Date());
         setError('');
@@ -68,6 +71,7 @@ const Dashboard = () => {
         console.error('❌ Error loading dashboard data:', error);
         setError('Failed to load dashboard data. Please try again.');
       } finally {
+        console.log('✅ Dashboard loading complete, setting loading to false');
         setLoading(false);
       }
     };
@@ -125,7 +129,8 @@ const Dashboard = () => {
     }
   };
 
-  if (loading && stats.totalCommunities === 0 && stats.totalListings === 0 && stats.totalProperties === 0) {
+  if (loading) {
+    console.log('🔄 Dashboard is in loading state');
     return (
       <div className="space-y-6">
         <div className="section-header">

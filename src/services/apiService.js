@@ -31,7 +31,7 @@ class ApiService {
 
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}/api${endpoint}`;
-    console.log(`🌐 API Request: ${url}`);
+
     
     const config = {
       headers: {
@@ -49,7 +49,6 @@ class ApiService {
 
     try {
       const response = await fetch(url, config);
-      console.log(`📡 Response status: ${response.status} for ${url}`);
       
       if (response.status === 401) {
         // Token expired or invalid, logout user
@@ -63,7 +62,6 @@ class ApiService {
       }
 
       const data = await response.json();
-      console.log(`✅ Success: ${url} returned ${Array.isArray(data) ? data.length : 1} items`);
       return data;
     } catch (error) {
       console.error(`❌ Error: ${url} - ${error.message}`);
@@ -263,7 +261,6 @@ export class DataService {
           }
         });
         await Promise.all(preloadPromises);
-        console.log(`✅ Preloaded ${this.communityCache.size} communities`);
       }
     } catch (error) {
       console.error('Error preloading communities:', error);
