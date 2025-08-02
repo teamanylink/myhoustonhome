@@ -11,16 +11,19 @@ const DashboardLayout = () => {
   const location = useLocation();
 
   useEffect(() => {
+    console.log('🔍 DashboardLayout: Checking authentication...');
     const token = localStorage.getItem('adminToken');
     const userData = localStorage.getItem('adminUser');
     
     if (!token || !userData) {
+      console.log('🔍 DashboardLayout: No token or user data, redirecting to login');
       navigate('/admin/login');
       return;
     }
 
     try {
       const parsedUser = JSON.parse(userData);
+      console.log('🔍 DashboardLayout: Setting user:', parsedUser);
       setUser(parsedUser);
     } catch (error) {
       console.error('Error parsing user data:', error);
@@ -188,7 +191,7 @@ const DashboardLayout = () => {
         </header>
 
         <main className="admin-content">
-          <Outlet />
+          <Outlet key={location.pathname} />
         </main>
       </div>
     </div>

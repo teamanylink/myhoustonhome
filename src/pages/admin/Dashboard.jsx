@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import apiService from '../../services/apiService';
 
 const Dashboard = () => {
+  const hasLoadedRef = useRef(false);
   const [stats, setStats] = useState({
     totalCommunities: 0,
     totalListings: 0,
@@ -14,12 +15,21 @@ const Dashboard = () => {
   const [lastUpdated, setLastUpdated] = useState(null);
 
   useEffect(() => {
+    if (hasLoadedRef.current) {
+      console.log('🔄 new Dashboard already loaded, skipping...');
+      return;
+    }
+    
+    let isMounted = true;
+    hasLoadedRef.current = true;
+    
     const fetchDashboardData = async () => {
       try {
+        if (!isMounted) return;
         setLoading(true);
         setError('');
         
-        console.log('🔄 Loading dashboard data...');
+        console.log('🔄 newLoading dashboard data...');
         
         // Fetch communities, listings, and properties
         const [communities, listings, properties] = await Promise.all([
@@ -27,6 +37,8 @@ const Dashboard = () => {
           apiService.getListings(),
           apiService.getProperties()
         ]);
+
+        if (!isMounted) return;
 
         console.log('✅ Dashboard data loaded:', {
           communities: communities.length,
@@ -68,15 +80,22 @@ const Dashboard = () => {
         setError('');
         
       } catch (error) {
+        if (!isMounted) return;
         console.error('❌ Error loading dashboard data:', error);
         setError('Failed to load dashboard data. Please try again.');
       } finally {
-        console.log('✅ Dashboard loading complete, setting loading to false');
-        setLoading(false);
+        if (isMounted) {
+          console.log('✅ Dashboard loading complete, setting loading to false');
+          setLoading(false);
+        }
       }
     };
 
     fetchDashboardData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []); // Empty dependency array - only run once on mount
 
   const handleRefresh = async () => {
