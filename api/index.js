@@ -46,7 +46,7 @@ const initializeDefaultAdmin = async () => {
 };
 
 // Authentication middleware
-const authenticateAdmin = (req, res, next) => {
+const authenticateAdmin = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1]; // Bearer TOKEN
   
   if (!token) {
@@ -59,10 +59,19 @@ const authenticateAdmin = (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     console.log('🔐 Token decoded successfully:', { adminId: decoded.adminId, email: decoded.email });
     
+    // Ensure default admin exists (for serverless cold starts)
+    if (admins.length === 0) {
+      console.log('🔐 Admin array empty, recreating default admin...');
+      await initializeDefaultAdmin();
+    }
+    
     const admin = admins.find(a => a.id === decoded.adminId && a.isActive);
     
     if (!admin) {
-      console.log('🔐 Auth failed: Admin not found or inactive');
+      console.log('🔐 Auth failed: Admin not found or inactive', { 
+        decodedAdminId: decoded.adminId, 
+        availableAdmins: admins.map(a => ({ id: a.id, email: a.email, isActive: a.isActive }))
+      });
       return res.status(401).json({ error: 'Invalid token or admin not found.' });
     }
     
@@ -709,7 +718,20 @@ app.use((req, res) => {
 });
 
 // Initialize default admin on startup
+console.log('🚀 Server starting, initializing default admin...');
 initializeDefaultAdmin();
+
+// Debug endpoint to check environment variables
+app.get('/api/debug/env', (req, res) => {
+  res.json({
+    hasJwtSecret: !!process.env.JWT_SECRET,
+    jwtSecretLength: process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 0,
+    jwtSecretPreview: process.env.JWT_SECRET ? process.env.JWT_SECRET.substring(0, 10) + '...' : 'NOT_SET',
+    nodeEnv: process.env.NODE_ENV,
+    currentSecretLength: JWT_SECRET.length,
+    currentSecretPreview: JWT_SECRET.substring(0, 10) + '...'
+  });
+});
 
 // Endpoint to ensure default admin exists (for deployment)
 app.post('/api/admin/ensure-default', async (req, res) => {
