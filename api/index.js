@@ -10,7 +10,14 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 // JWT Secret - in production, use environment variable
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'f310587d18ff021996bee1fd1d54f77c187d3262ed36ac87629afd4d6373ef1cb4dce30ddaeabb605ea0c8f7b1d41c4d22779d176e4210239fbcdec3b1e1542e';
+
+console.log('🔐 JWT Secret check:', {
+  hasEnvSecret: !!process.env.JWT_SECRET,
+  secretLength: JWT_SECRET.length,
+  secretPreview: JWT_SECRET.substring(0, 10) + '...',
+  nodeEnv: process.env.NODE_ENV
+});
 const SALT_ROUNDS = 10;
 
 // Middleware
@@ -43,20 +50,27 @@ const authenticateAdmin = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1]; // Bearer TOKEN
   
   if (!token) {
+    console.log('🔐 Auth failed: No token provided');
     return res.status(401).json({ error: 'Access denied. No token provided.' });
   }
   
   try {
+    console.log('🔐 Verifying token with secret length:', JWT_SECRET.length);
     const decoded = jwt.verify(token, JWT_SECRET);
+    console.log('🔐 Token decoded successfully:', { adminId: decoded.adminId, email: decoded.email });
+    
     const admin = admins.find(a => a.id === decoded.adminId && a.isActive);
     
     if (!admin) {
+      console.log('🔐 Auth failed: Admin not found or inactive');
       return res.status(401).json({ error: 'Invalid token or admin not found.' });
     }
     
+    console.log('🔐 Auth successful for:', admin.email);
     req.admin = admin;
     next();
   } catch (error) {
+    console.log('🔐 Auth failed: JWT verification error:', error.message);
     res.status(401).json({ error: 'Invalid token.' });
   }
 };

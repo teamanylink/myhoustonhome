@@ -2,8 +2,13 @@
 class ApiService {
   constructor() {
     // Use relative URL for Vite proxy, fallback to absolute URL for production
-    this.baseURL = import.meta.env.VITE_API_URL || '';
+    this.baseURL = import.meta.env.VITE_API_URL || (import.meta.env.MODE === 'development' ? '' : window.location.origin);
     this.token = localStorage.getItem('adminToken');
+    console.log('🔧 ApiService initialized:', {
+      baseURL: this.baseURL,
+      mode: import.meta.env.MODE,
+      envApiUrl: import.meta.env.VITE_API_URL
+    });
   }
 
   // Authentication methods

@@ -30,6 +30,12 @@ const Dashboard = () => {
         setError('');
         
         console.log('🔄 newLoading dashboard data...');
+        console.log('🔍 Environment check:', {
+          baseURL: apiService.baseURL,
+          hasToken: !!apiService.getToken(),
+          env: import.meta.env.MODE,
+          apiUrl: import.meta.env.VITE_API_URL
+        });
         
         // Fetch communities, listings, and properties
         const [communities, listings, properties] = await Promise.all([
