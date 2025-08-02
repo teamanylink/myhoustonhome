@@ -249,6 +249,29 @@ const AdminLogin = () => {
               }}>
                 Admin credentials are pre-filled for demo
               </div>
+              
+              <div style={{ 
+                marginTop: '8px', 
+                textAlign: 'center' 
+              }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    localStorage.clear();
+                    window.location.reload();
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#007AFF',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Clear stored data and reload
+                </button>
+              </div>
             </form>
           </div>
         </div>
