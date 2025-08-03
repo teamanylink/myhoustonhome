@@ -163,11 +163,11 @@ const AdminUsers = () => {
                       <p className="font-medium text-primary">{admin.email}</p>
                       <div className="flex items-center space-x-2 text-sm text-secondary">
                         <span className={`px-2 py-1 rounded-full text-xs ${
-                          admin.role === 'super_admin' 
+                          admin.role === 'SUPER_ADMIN' 
                             ? 'bg-purple-100 text-purple-700' 
                             : 'bg-blue-100 text-blue-700'
                         }`}>
-                          {admin.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+                          {admin.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Admin'}
                         </span>
                         <span>•</span>
                         <span>Created {new Date(admin.createdAt).toLocaleDateString()}</span>
@@ -176,7 +176,7 @@ const AdminUsers = () => {
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    {admin.role !== 'super_admin' && (
+                    {admin.role !== 'SUPER_ADMIN' && (
                       <button
                         onClick={() => setShowDeleteConfirm(admin)}
                         className="btn btn-danger btn-sm"
@@ -244,8 +244,8 @@ const AdminUsers = () => {
                   onChange={(e) => handleInputChange('role', e.target.value)}
                   className="input-field"
                 >
-                  <option value="admin">Admin</option>
-                  <option value="super_admin">Super Admin</option>
+                  <option value="ADMIN">Admin</option>
+                  <option value="SUPER_ADMIN">Super Admin</option>
                 </select>
               </div>
 

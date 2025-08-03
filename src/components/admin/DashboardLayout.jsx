@@ -133,7 +133,7 @@ const DashboardLayout = () => {
         <nav className="admin-sidebar-nav">
           {navItems
             .filter(item => {
-              const shouldShow = !item.requiresSuperAdmin || user.role === 'super_admin';
+              const shouldShow = !item.requiresSuperAdmin || user.role === 'SUPER_ADMIN';
               return shouldShow;
             })
             .map((item) => (

@@ -124,7 +124,7 @@ const AdminPage = () => {
   };
 
   const refreshAdminUsers = async () => {
-    if (currentAdmin?.role === 'super_admin') {
+    if (currentAdmin?.role === 'SUPER_ADMIN') {
       try {
         const users = await DataService.getAdminUsers();
         setAdminUsers(users);
@@ -231,7 +231,7 @@ const AdminPage = () => {
     { id: 'communities', label: 'Communities', count: communities.length },
     { id: 'listings', label: 'Listings', count: listings.length },
     { id: 'contacts', label: 'Contacts', count: contacts.length },
-    ...(currentAdmin?.role === 'super_admin' ? [
+            ...(currentAdmin?.role === 'SUPER_ADMIN' ? [
       { id: 'admins', label: 'Admin Users', count: adminUsers.length }
     ] : [])
   ];
@@ -253,7 +253,7 @@ const AdminPage = () => {
               </p>
             </div>
             <div className="flex gap-2">
-              {currentAdmin?.role === 'super_admin' && (
+              {currentAdmin?.role === 'SUPER_ADMIN' && (
                 <button
                   className="btn btn-ghost"
                   onClick={() => setActiveTab('admins')}
@@ -315,7 +315,7 @@ const AdminPage = () => {
             {activeTab === 'contacts' && (
               <ContactsTab contacts={contacts} onRefresh={refreshData} />
             )}
-            {activeTab === 'admins' && currentAdmin?.role === 'super_admin' && (
+            {activeTab === 'admins' && currentAdmin?.role === 'SUPER_ADMIN' && (
               <AdminUsersTab adminUsers={adminUsers} currentAdmin={currentAdmin} onRefresh={refreshAdminUsers} />
             )}
           </motion.div>
@@ -1318,7 +1318,7 @@ const AdminUsersTab = ({ adminUsers, currentAdmin, onRefresh }) => {
                   )}
                 </h3>
                 <p className="text-body text-secondary">
-                  Role: {admin.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+                                          Role: {admin.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Admin'}
                 </p>
                 <p className="text-footnote text-tertiary">
                   Created: {new Date(admin.createdAt).toLocaleDateString()}
@@ -1427,8 +1427,8 @@ const AdminUserForm = ({ onClose, onSave }) => {
               onChange={(e) => setFormData({ ...formData, role: e.target.value })}
               className="form-select"
             >
-              <option value="admin">Admin</option>
-              <option value="super_admin">Super Admin</option>
+              <option value="ADMIN">Admin</option>
+                                    <option value="SUPER_ADMIN">Super Admin</option>
             </select>
           </div>
 
