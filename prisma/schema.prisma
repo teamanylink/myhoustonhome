@@ -130,6 +130,18 @@ model Contact {
   @@map("contacts")
 }
 
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // Hashed password
+  role      AdminRole @default(ADMIN)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admins")
+}
+
 enum ListingType {
   HOUSE
   TOWNHOME
@@ -157,4 +169,9 @@ enum PropertyStatus {
   PENDING
   SOLD
   OFF_MARKET
+}
+
+enum AdminRole {
+  ADMIN
+  SUPER_ADMIN
 }

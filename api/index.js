@@ -4,6 +4,7 @@ import cors from 'cors';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { DatabaseService } from '../src/services/databaseService.js';
+import { AdminService } from '../src/services/adminService.js';
 import { put, list, del } from '@vercel/blob';
 
 const app = express();
@@ -24,73 +25,16 @@ const SALT_ROUNDS = 10;
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// In-memory storage for admin users only (communities, listings, contacts use database)
-let admins = [];
-
-// Initialize default admin
-const initializeDefaultAdmin = async () => {
-  // Check if default admin already exists to prevent duplicates
-  const existingDefault = admins.find(a => a.email === 'denis@denvagroup.com');
-  if (!existingDefault) {
-    const hashedPassword = await bcrypt.hash('TempPassword123!', SALT_ROUNDS);
-    admins.push({
-      id: 'admin-1',
-      email: 'denis@denvagroup.com',
-      password: hashedPassword,
-      role: 'super_admin',
-      createdAt: new Date().toISOString(),
-      isActive: true
-    });
-    console.log('✅ Default admin created: denis@denvagroup.com');
-    console.log('🔑 Temporary password: TempPassword123!');
-    console.log('⚠️  Please change this password immediately after first login');
-  } else {
-    console.log('✅ Default admin already exists, skipping creation');
+// Initialize admin system using database
+const initializeAdminSystem = async () => {
+  try {
+    console.log('🔧 Initializing admin system with database...');
+    await AdminService.ensureDefaultAdmin();
+    console.log('✅ Admin system initialized successfully');
+  } catch (error) {
+    console.error('❌ Failed to initialize admin system:', error);
+    throw error;
   }
-};
-
-// Hard-coded fallback admins (temporary solution for serverless persistence)
-const FALLBACK_ADMINS = [
-  {
-    id: 'admin-1',
-    email: 'denis@denvagroup.com',
-    // This will be hashed when recreated
-    tempPassword: 'TempPassword123!',
-    role: 'super_admin',
-    isActive: true
-  },
-  // Add your new admin here when created to persist across cold starts:
-  {
-    id: 'admin-1754226752915',
-    email: 'test@admin.com',
-    tempPassword: 'password123', // Replace with actual password used
-    role: 'admin',
-    isActive: true
-  }
-];
-
-// Initialize all admins (for serverless cold starts)
-const initializeAllAdmins = async () => {
-  console.log('🔄 Recreating admins from fallback list...');
-  
-  for (const fallbackAdmin of FALLBACK_ADMINS) {
-    const existing = admins.find(a => a.email === fallbackAdmin.email);
-    if (!existing) {
-      const hashedPassword = await bcrypt.hash(fallbackAdmin.tempPassword, SALT_ROUNDS);
-      admins.push({
-        id: fallbackAdmin.id,
-        email: fallbackAdmin.email,
-        password: hashedPassword,
-        role: fallbackAdmin.role,
-        createdAt: new Date().toISOString(),
-        isActive: fallbackAdmin.isActive
-      });
-      console.log(`✅ Recreated admin: ${fallbackAdmin.email}`);
-    }
-  }
-  
-  console.log('⚠️  NOTE: To persist new admins across cold starts, add them to FALLBACK_ADMINS array');
-  console.log('💡 RECOMMENDED: Move admin storage to database for proper persistence');
 };
 
 // Authentication middleware
@@ -107,18 +51,14 @@ const authenticateAdmin = async (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     console.log('🔐 Token decoded successfully:', { adminId: decoded.adminId, email: decoded.email });
     
-    // Ensure default admin exists (for serverless cold starts)
-    if (admins.length === 0) {
-      console.log('🔐 Admin array empty, recreating all admins...');
-      await initializeAllAdmins();
-    }
+    // Find admin in database
+    const admin = await AdminService.findAdminById(decoded.adminId);
     
-    const admin = admins.find(a => a.id === decoded.adminId && a.isActive);
-    
-    if (!admin) {
+    if (!admin || !admin.isActive) {
       console.log('🔐 Auth failed: Admin not found or inactive', { 
-        decodedAdminId: decoded.adminId, 
-        availableAdmins: admins.map(a => ({ id: a.id, email: a.email, isActive: a.isActive }))
+        decodedAdminId: decoded.adminId,
+        adminFound: !!admin,
+        adminActive: admin?.isActive
       });
       return res.status(401).json({ error: 'Invalid token or admin not found.' });
     }
@@ -134,7 +74,7 @@ const authenticateAdmin = async (req, res, next) => {
 
 // Super admin middleware (for admin management)
 const requireSuperAdmin = (req, res, next) => {
-  if (req.admin.role !== 'super_admin') {
+  if (req.admin.role !== 'SUPER_ADMIN') {
     return res.status(403).json({ error: 'Super admin access required.' });
   }
   next();
@@ -151,71 +91,46 @@ app.post('/api/admin/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required.' });
     }
     
-    // Check if this is the default admin login attempt
-    if (email.toLowerCase() === 'denis@denvagroup.com' && password === 'TempPassword123!') {
-      // Ensure default admin exists
-      let admin = admins.find(a => a.email.toLowerCase() === email.toLowerCase() && a.isActive);
-      
-      if (!admin) {
-        console.log('🔧 Creating default admin on first login attempt...');
-        const hashedPassword = await bcrypt.hash('TempPassword123!', SALT_ROUNDS);
-        admin = {
-          id: 'admin-1',
-          email: 'denis@denvagroup.com',
-          password: hashedPassword,
-          role: 'super_admin',
-          createdAt: new Date().toISOString(),
-          isActive: true
-        };
-        admins.push(admin);
-        console.log('✅ Default admin created: denis@denvagroup.com');
-      }
-      
-      // Handle default admin login
-      const token = jwt.sign(
-        { adminId: admin.id, email: admin.email, role: admin.role },
-        JWT_SECRET,
-        { expiresIn: '24h' }
-      );
-      
-      res.json({
-        token,
-        admin: {
-          id: admin.id,
-          email: admin.email,
-          role: admin.role
-        }
-      });
-      return;
-    } else {
-      // Regular login flow
-      const admin = admins.find(a => a.email.toLowerCase() === email.toLowerCase() && a.isActive);
-      
-      if (!admin) {
-        return res.status(401).json({ error: 'Invalid email or password.' });
-      }
-      
-      const isValidPassword = await bcrypt.compare(password, admin.password);
-      
-      if (!isValidPassword) {
-        return res.status(401).json({ error: 'Invalid email or password.' });
-      }
-      
-      const token = jwt.sign(
-        { adminId: admin.id, email: admin.email, role: admin.role },
-        JWT_SECRET,
-        { expiresIn: '24h' }
-      );
-      
-      res.json({
-        token,
-        admin: {
-          id: admin.id,
-          email: admin.email,
-          role: admin.role
-        }
-      });
+    console.log('🔐 Login attempt for:', email);
+    
+    // Find admin in database
+    const admin = await AdminService.findAdminByEmail(email);
+    
+    if (!admin) {
+      console.log('🔐 Login failed: Admin not found:', email);
+      return res.status(401).json({ error: 'Invalid email or password.' });
     }
+    
+    if (!admin.isActive) {
+      console.log('🔐 Login failed: Admin inactive:', email);
+      return res.status(401).json({ error: 'Account is disabled.' });
+    }
+    
+    // Validate password
+    const isValidPassword = await AdminService.validatePassword(password, admin.password);
+    
+    if (!isValidPassword) {
+      console.log('🔐 Login failed: Invalid password for:', email);
+      return res.status(401).json({ error: 'Invalid email or password.' });
+    }
+    
+    console.log('🔐 Login successful for:', email);
+    
+    // Generate JWT token
+    const token = jwt.sign(
+      { adminId: admin.id, email: admin.email, role: admin.role },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+    
+    res.json({
+      token,
+      admin: {
+        id: admin.id,
+        email: admin.email,
+        role: admin.role
+      }
+    });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error.' });
@@ -266,18 +181,20 @@ app.post('/api/admin/change-password', authenticateAdmin, async (req, res) => {
 // ===== ADMIN MANAGEMENT ROUTES (Super Admin Only) =====
 
 // Get all admins
-app.get('/api/admin/users', authenticateAdmin, requireSuperAdmin, (req, res) => {
-  const adminUsers = admins
-    .filter(a => a.isActive)
-    .map(({ password, ...admin }) => admin); // Remove password from response
-  
-  res.json(adminUsers);
+app.get('/api/admin/users', authenticateAdmin, requireSuperAdmin, async (req, res) => {
+  try {
+    const adminUsers = await AdminService.getAllAdmins();
+    res.json(adminUsers);
+  } catch (error) {
+    console.error('Get admins error:', error);
+    res.status(500).json({ error: 'Failed to fetch admin users.' });
+  }
 });
 
 // Create new admin
 app.post('/api/admin/users', authenticateAdmin, requireSuperAdmin, async (req, res) => {
   try {
-    const { email, password, role = 'admin' } = req.body;
+    const { email, password, role = 'ADMIN' } = req.body;
     
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required.' });
@@ -287,51 +204,38 @@ app.post('/api/admin/users', authenticateAdmin, requireSuperAdmin, async (req, r
       return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
     }
     
-    // Check if admin already exists
-    const existingAdmin = admins.find(a => a.email.toLowerCase() === email.toLowerCase());
-    if (existingAdmin) {
-      return res.status(400).json({ error: 'Admin with this email already exists.' });
-    }
-    
-    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-    const newAdmin = {
-      id: `admin-${Date.now()}`,
-      email: email.toLowerCase(),
-      password: hashedPassword,
-      role: role === 'super_admin' ? 'super_admin' : 'admin',
-      createdAt: new Date().toISOString(),
-      isActive: true
-    };
-    
-    admins.push(newAdmin);
-    
-    // Return admin without password
-    const { password: _, ...adminResponse } = newAdmin;
-    res.status(201).json(adminResponse);
+    const newAdmin = await AdminService.createAdmin({ email, password, role });
+    res.status(201).json(newAdmin);
   } catch (error) {
     console.error('Create admin error:', error);
-    res.status(500).json({ error: 'Internal server error.' });
+    if (error.message.includes('already exists')) {
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Internal server error.' });
+    }
   }
 });
 
 // Delete admin
-app.delete('/api/admin/users/:id', authenticateAdmin, requireSuperAdmin, (req, res) => {
-  const { id } = req.params;
-  
-  if (id === req.admin.id) {
-    return res.status(400).json({ error: 'Cannot delete your own account.' });
+app.delete('/api/admin/users/:id', authenticateAdmin, requireSuperAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (id === req.admin.id) {
+      return res.status(400).json({ error: 'Cannot delete your own account.' });
+    }
+    
+    // Soft delete by deactivating the admin
+    await AdminService.updateAdmin(id, { isActive: false });
+    res.json({ message: 'Admin deleted successfully.' });
+  } catch (error) {
+    console.error('Delete admin error:', error);
+    if (error.message.includes('not found')) {
+      res.status(404).json({ error: 'Admin not found.' });
+    } else {
+      res.status(500).json({ error: 'Failed to delete admin.' });
+    }
   }
-  
-  const adminIndex = admins.findIndex(a => a.id === id);
-  
-  if (adminIndex === -1) {
-    return res.status(404).json({ error: 'Admin not found.' });
-  }
-  
-  // Soft delete
-  admins[adminIndex].isActive = false;
-  
-  res.json({ message: 'Admin deleted successfully.' });
 });
 
 // ===== PROTECTED COMMUNITY ROUTES =====
@@ -760,9 +664,9 @@ app.delete('/api/upload', authenticateAdmin, async (req, res) => {
   }
 });
 
-// Initialize default admin on startup
-console.log('🚀 Server starting, initializing default admin...');
-initializeDefaultAdmin();
+// Initialize admin system on startup
+console.log('🚀 Server starting, initializing admin system...');
+initializeAdminSystem();
 
 // Health check endpoint
 app.get('/api/health', async (req, res) => {
