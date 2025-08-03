@@ -712,14 +712,58 @@ app.delete('/api/upload', authenticateAdmin, async (req, res) => {
   }
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-
 // Initialize default admin on startup
 console.log('🚀 Server starting, initializing default admin...');
 initializeDefaultAdmin();
+
+// Health check endpoint
+app.get('/api/health', async (req, res) => {
+  try {
+    console.log('🏥 Health check requested');
+    
+    // Test database connection
+    let dbStatus = 'unknown';
+    let dbError = null;
+    
+    try {
+      const { DatabaseService } = await import('../src/services/databaseService.js');
+      // Try a simple query with timeout
+      await Promise.race([
+        DatabaseService.getCommunities(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Database health check timeout')), 5000)
+        )
+      ]);
+      dbStatus = 'connected';
+      console.log('✅ Database connection healthy');
+    } catch (error) {
+      dbStatus = 'error';
+      dbError = error.message;
+      console.error('❌ Database connection failed:', error.message);
+    }
+    
+    res.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      database: {
+        status: dbStatus,
+        error: dbError,
+        hasDatabaseUrl: !!process.env.DATABASE_URL
+      },
+      environment: {
+        nodeEnv: process.env.NODE_ENV || 'not set',
+        hasJwtSecret: !!process.env.JWT_SECRET
+      }
+    });
+  } catch (error) {
+    console.error('❌ Health check failed:', error);
+    res.status(500).json({
+      status: 'error',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
 
 // Debug endpoint to check environment variables
 app.get('/api/debug/env', (req, res) => {
@@ -768,6 +812,12 @@ app.post('/api/admin/ensure-default', async (req, res) => {
     console.error('Error ensuring default admin:', error);
     res.status(500).json({ error: 'Failed to ensure default admin' });
   }
+});
+
+// 404 handler - MUST be last
+app.use((req, res) => {
+  console.log('❌ Route not found:', req.path);
+  res.status(404).json({ error: 'Route not found' });
 });
 
 // Start server if this file is run directly
