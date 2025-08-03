@@ -29,7 +29,7 @@ const DashboardLayout = () => {
       console.error('Error parsing user data:', error);
       navigate('/admin/login');
     }
-  }, [navigate]);
+  }, []); // Empty dependency array - only run once on mount
 
   const handleLogout = () => {
     // Set loading state
