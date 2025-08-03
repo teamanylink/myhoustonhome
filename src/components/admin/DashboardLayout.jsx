@@ -12,22 +12,30 @@ const DashboardLayout = () => {
   const location = useLocation();
 
   useEffect(() => {
-    console.log('🔍 DashboardLayout: Checking authentication...');
-    const token = localStorage.getItem('adminToken');
-    const userData = localStorage.getItem('adminUser');
-    
-    if (!token || !userData) {
-      console.log('🔍 DashboardLayout: No token or user data, redirecting to login');
-      navigate('/admin/login');
+    // Ensure we're running on the client side
+    if (typeof window === 'undefined') {
+      console.log('🔍 DashboardLayout: Running on server, skipping auth check');
+      setAuthChecked(true);
       return;
     }
 
+    console.log('🔍 DashboardLayout: Checking authentication...');
+    
     try {
+      const token = localStorage.getItem('adminToken');
+      const userData = localStorage.getItem('adminUser');
+      
+      if (!token || !userData) {
+        console.log('🔍 DashboardLayout: No token or user data, redirecting to login');
+        navigate('/admin/login');
+        return;
+      }
+
       const parsedUser = JSON.parse(userData);
       console.log('🔍 DashboardLayout: Setting user:', parsedUser);
       setUser(parsedUser);
     } catch (error) {
-      console.error('Error parsing user data:', error);
+      console.error('Error accessing localStorage or parsing user data:', error);
       navigate('/admin/login');
     } finally {
       // Always mark auth as checked, whether successful or not
