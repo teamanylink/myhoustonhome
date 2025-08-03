@@ -421,7 +421,12 @@ const CommunitiesTab = ({ communities, onRefresh }) => {
 
       {communities.length === 0 && (
         <div className="empty-state">
-          <div className="empty-state-icon">🏘️</div>
+                          <div className="empty-state-icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9,22 9,12 15,12 15,22"/>
+                  </svg>
+                </div>
           <p className="text-body mb-4">No communities yet.</p>
           <button
             onClick={() => setShowForm(true)}
@@ -1339,7 +1344,12 @@ const AdminUsersTab = ({ adminUsers, currentAdmin, onRefresh }) => {
 
       {adminUsers.length === 0 && (
         <div className="empty-state">
-          <div className="empty-state-icon">👥</div>
+                          <div className="empty-state-icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                </div>
           <p className="text-body mb-4">No admin users found.</p>
         </div>
       )}

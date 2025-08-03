@@ -180,7 +180,10 @@ const Properties = () => {
             onClick={() => setShowAddForm(true)}
             className="btn btn-primary"
           >
-            <span className="mr-2">🏠</span>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mr-2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
             Add Property
           </button>
         </div>
@@ -417,7 +420,12 @@ const Properties = () => {
         <div className="admin-card-content">
           {filteredProperties.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-state-icon">🏠</div>
+              <div className="empty-state-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
               <p>No properties found</p>
               <p className="text-sm text-secondary mt-2">
                 {searchTerm ? 'Try adjusting your search terms' : 'Start by adding your first property'}

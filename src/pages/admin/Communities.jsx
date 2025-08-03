@@ -153,7 +153,12 @@ const Communities = () => {
       {/* Communities Grid */}
       {filteredCommunities.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state-icon">🏘️</div>
+          <div className="empty-state-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9,22 9,12 15,12 15,22"/>
+            </svg>
+          </div>
           <h3>No communities found</h3>
           <p>
             {searchTerm 
