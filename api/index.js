@@ -29,7 +29,9 @@ let admins = [];
 
 // Initialize default admin
 const initializeDefaultAdmin = async () => {
-  if (admins.length === 0) {
+  // Check if default admin already exists to prevent duplicates
+  const existingDefault = admins.find(a => a.email === 'denis@denvagroup.com');
+  if (!existingDefault) {
     const hashedPassword = await bcrypt.hash('TempPassword123!', SALT_ROUNDS);
     admins.push({
       id: 'admin-1',
@@ -42,7 +44,53 @@ const initializeDefaultAdmin = async () => {
     console.log('✅ Default admin created: denis@denvagroup.com');
     console.log('🔑 Temporary password: TempPassword123!');
     console.log('⚠️  Please change this password immediately after first login');
+  } else {
+    console.log('✅ Default admin already exists, skipping creation');
   }
+};
+
+// Hard-coded fallback admins (temporary solution for serverless persistence)
+const FALLBACK_ADMINS = [
+  {
+    id: 'admin-1',
+    email: 'denis@denvagroup.com',
+    // This will be hashed when recreated
+    tempPassword: 'TempPassword123!',
+    role: 'super_admin',
+    isActive: true
+  },
+  // Add your new admin here when created to persist across cold starts:
+  {
+    id: 'admin-1754226752915',
+    email: 'test@admin.com',
+    tempPassword: 'password123', // Replace with actual password used
+    role: 'admin',
+    isActive: true
+  }
+];
+
+// Initialize all admins (for serverless cold starts)
+const initializeAllAdmins = async () => {
+  console.log('🔄 Recreating admins from fallback list...');
+  
+  for (const fallbackAdmin of FALLBACK_ADMINS) {
+    const existing = admins.find(a => a.email === fallbackAdmin.email);
+    if (!existing) {
+      const hashedPassword = await bcrypt.hash(fallbackAdmin.tempPassword, SALT_ROUNDS);
+      admins.push({
+        id: fallbackAdmin.id,
+        email: fallbackAdmin.email,
+        password: hashedPassword,
+        role: fallbackAdmin.role,
+        createdAt: new Date().toISOString(),
+        isActive: fallbackAdmin.isActive
+      });
+      console.log(`✅ Recreated admin: ${fallbackAdmin.email}`);
+    }
+  }
+  
+  console.log('⚠️  NOTE: To persist new admins across cold starts, add them to FALLBACK_ADMINS array');
+  console.log('💡 RECOMMENDED: Move admin storage to database for proper persistence');
 };
 
 // Authentication middleware
@@ -61,8 +109,8 @@ const authenticateAdmin = async (req, res, next) => {
     
     // Ensure default admin exists (for serverless cold starts)
     if (admins.length === 0) {
-      console.log('🔐 Admin array empty, recreating default admin...');
-      await initializeDefaultAdmin();
+      console.log('🔐 Admin array empty, recreating all admins...');
+      await initializeAllAdmins();
     }
     
     const admin = admins.find(a => a.id === decoded.adminId && a.isActive);
