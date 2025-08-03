@@ -111,40 +111,129 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="section-header">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="section-title">Dashboard Overview</h1>
-            <p className="section-subtitle">
-              Welcome to your admin dashboard. Here's a quick overview of your content.
-            </p>
-            {lastUpdated && (
-              <p className="text-sm text-tertiary mt-1">
-                Last updated: {lastUpdated.toLocaleTimeString()}
+      <div className="admin-card" style={{ 
+        background: 'white',
+        border: '1px solid #e5e7eb',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div className="admin-card-content" style={{ padding: '32px' }}>
+          <div className="flex justify-between items-start">
+            <div style={{ flex: 1 }}>
+              <div className="flex items-center" style={{ marginBottom: '16px', gap: '12px' }}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)'
+                }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="text-title-1" style={{ 
+                    margin: 0,
+                    color: 'var(--text-primary)'
+                  }}>
+                    Dashboard Overview
+                  </h1>
+                  <p className="text-body text-secondary" style={{ margin: '4px 0 0 0' }}>
+                    Real-time insights and controls
+                  </p>
+                </div>
+              </div>
+              <p className="text-body text-secondary" style={{ 
+                marginBottom: '16px',
+                lineHeight: '1.6',
+                maxWidth: '600px'
+              }}>
+                Welcome to your admin dashboard. Here's a comprehensive overview of your content and recent activity.
               </p>
-            )}
+              {lastUpdated && (
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 16px',
+                  background: 'rgba(34, 197, 94, 0.1)',
+                  border: '1px solid rgba(34, 197, 94, 0.2)',
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}>
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    background: 'var(--success-color)',
+                    borderRadius: '50%',
+                    animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                  }}></div>
+                  <span className="text-secondary">
+                    Last updated: {lastUpdated.toLocaleTimeString()}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div style={{ marginLeft: '24px' }}>
+              <button
+                onClick={handleRefresh}
+                disabled={loading}
+                className="btn btn-primary"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '12px 24px',
+                  borderRadius: '12px',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  transition: 'all 0.2s ease',
+                  boxShadow: loading ? 'none' : '0 2px 8px rgba(0, 122, 255, 0.2)',
+                  opacity: loading ? 0.7 : 1
+                }}
+              >
+                {loading ? (
+                  <>
+                    <div style={{
+                      width: '16px',
+                      height: '16px',
+                      border: '2px solid rgba(255, 255, 255, 0.3)',
+                      borderTop: '2px solid white',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }}></div>
+                    <span>Refreshing...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg 
+                      width="16" 
+                      height="16" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2"
+                      style={{ transition: 'transform 0.2s ease' }}
+                    >
+                      <polyline points="23,4 23,10 17,10"/>
+                      <polyline points="1,20 1,14 7,14"/>
+                      <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/>
+                    </svg>
+                    <span>Refresh</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
-          <button
-            onClick={handleRefresh}
-            disabled={loading}
-            className="btn btn-secondary"
-          >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Refreshing...
-              </>
-            ) : (
-              <>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mr-2">
-                  <polyline points="23,4 23,10 17,10"/>
-                  <polyline points="1,20 1,14 7,14"/>
-                  <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/>
-                </svg>
-                Refresh
-              </>
-            )}
-          </button>
         </div>
       </div>
 
