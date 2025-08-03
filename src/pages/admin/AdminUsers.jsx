@@ -9,6 +9,7 @@ const AdminUsers = () => {
   const [success, setSuccess] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -19,6 +20,11 @@ const AdminUsers = () => {
   // Load admins on component mount
   useEffect(() => {
     loadAdmins();
+    // Get current user info
+    const adminUser = localStorage.getItem('adminUser');
+    if (adminUser) {
+      setCurrentUser(JSON.parse(adminUser));
+    }
   }, []);
 
   const loadAdmins = async () => {
@@ -76,13 +82,38 @@ const AdminUsers = () => {
   };
 
   const handleDeleteAdmin = async (adminId) => {
+    console.log('🗑️ Starting delete admin process:', { adminId, currentUser });
+    
     try {
-      await apiService.deleteAdminUser(adminId);
+      console.log('🔧 Calling apiService.deleteAdminUser with ID:', adminId);
+      const result = await apiService.deleteAdminUser(adminId);
+      console.log('✅ Delete API call successful:', result);
+      
       setShowDeleteConfirm(null);
+      setSuccess('Admin user deleted successfully!');
+      console.log('✅ Success message set, reloading admins list...');
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(''), 3000);
       loadAdmins(); // Reload the list
     } catch (err) {
-      setError('Failed to delete admin');
-      console.error('Error deleting admin:', err);
+      console.error('❌ Error deleting admin:', {
+        error: err,
+        message: err.message,
+        stack: err.stack,
+        adminId,
+        currentUser
+      });
+      
+      if (err.message.includes('Super admin access required')) {
+        setError('Only Super Admins can delete admin users. You do not have sufficient permissions.');
+      } else if (err.message.includes('Cannot delete your own account')) {
+        setError('You cannot delete your own account. Please contact another Super Admin.');
+      } else {
+        setError('Failed to delete admin: ' + err.message);
+      }
+      // Clear error message after 5 seconds
+      setTimeout(() => setError(''), 5000);
     }
   };
 
@@ -158,6 +189,25 @@ const AdminUsers = () => {
               }}>
                 Manage admin access to the system. Create, view, and remove administrator accounts with different permission levels.
               </p>
+              {currentUser && (
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '6px 12px',
+                  background: 'rgba(59, 130, 246, 0.1)',
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  marginTop: '12px'
+                }}>
+                  <span style={{ color: '#3b82f6' }}>👤</span>
+                  <span style={{ color: '#374151' }}>
+                    Logged in as: <strong>{currentUser.email}</strong> ({currentUser.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Admin'})
+                  </span>
+                </div>
+              )}
             </div>
             <div style={{ marginLeft: '24px' }}>
               <button
@@ -227,12 +277,12 @@ const AdminUsers = () => {
                 Current Admins
               </h2>
               <p className="text-body text-secondary" style={{ margin: '2px 0 0 0', fontSize: '14px' }}>
-                {admins.length} active admin user{admins.length !== 1 ? 's' : ''}
+                {admins.filter(admin => admin.isActive).length} active admin user{admins.filter(admin => admin.isActive).length !== 1 ? 's' : ''}
               </p>
             </div>
           </div>
           
-          {admins.length === 0 ? (
+          {admins.filter(admin => admin.isActive).length === 0 ? (
             <div style={{
               textAlign: 'center',
               padding: '48px 24px',
@@ -257,12 +307,12 @@ const AdminUsers = () => {
                 </svg>
               </div>
               <p className="text-secondary" style={{ fontSize: '16px', fontWeight: '500' }}>
-                No admin users found
+                No active admin users found
               </p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {admins.map((admin, index) => (
+              {admins.filter(admin => admin.isActive).map((admin, index) => (
                 <motion.div
                   key={admin.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -343,9 +393,13 @@ const AdminUsers = () => {
                   </div>
                   
                   <div className="flex items-center" style={{ gap: '8px' }}>
-                    {admin.role !== 'SUPER_ADMIN' && (
+                    {admin.role !== 'SUPER_ADMIN' && 
+                     admin.id !== currentUser?.id && (
                       <button
-                        onClick={() => setShowDeleteConfirm(admin)}
+                        onClick={() => {
+                          console.log('🖱️ Delete button clicked for admin:', admin);
+                          setShowDeleteConfirm(admin);
+                        }}
                         style={{
                           display: 'flex',
                           alignItems: 'center',

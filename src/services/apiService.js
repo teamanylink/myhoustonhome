@@ -36,6 +36,7 @@ class ApiService {
 
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}/api${endpoint}`;
+    console.log('🌐 Making request:', { url, method: options.method || 'GET', endpoint });
 
     
     const config = {
@@ -48,14 +49,28 @@ class ApiService {
       ...options,
     };
 
+    console.log('🔧 Request config:', {
+      url,
+      method: config.method,
+      hasAuth: !!config.headers.Authorization,
+      headers: Object.keys(config.headers)
+    });
+
     if (config.body && typeof config.body === 'object') {
       config.body = JSON.stringify(config.body);
     }
 
     try {
+      console.log('📡 Sending request to:', url);
       const response = await fetch(url, config);
+      console.log('📡 Response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      });
       
       if (response.status === 401) {
+        console.log('🔐 401 Unauthorized - logging out user');
         // Token expired or invalid, logout user
         this.logout();
         throw new Error('Authentication expired. Please login again.');
@@ -63,13 +78,15 @@ class ApiService {
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.error('❌ HTTP error:', { status: response.status, errorData });
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('✅ Request successful:', data);
       return data;
     } catch (error) {
-      console.error(`❌ Error: ${url} - ${error.message}`);
+      console.error(`❌ Request failed: ${url} - ${error.message}`);
       if (error.message.includes('Authentication expired')) {
         // Re-throw auth errors to be handled by components
         throw error;
@@ -121,9 +138,23 @@ class ApiService {
   }
 
   async deleteAdminUser(id) {
-    return this.request(`/admin/users/${id}`, {
-      method: 'DELETE'
-    });
+    console.log('🔧 ApiService.deleteAdminUser called with ID:', id);
+    console.log('🔧 Current token:', this.getToken() ? 'Present' : 'Missing');
+    
+    try {
+      const result = await this.request(`/admin/users/${id}`, {
+        method: 'DELETE'
+      });
+      console.log('✅ ApiService.deleteAdminUser successful:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ ApiService.deleteAdminUser failed:', {
+        id,
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
   }
 
   // ===== COMMUNITY METHODS =====
