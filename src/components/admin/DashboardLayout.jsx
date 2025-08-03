@@ -6,6 +6,7 @@ const DashboardLayout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,6 +29,9 @@ const DashboardLayout = () => {
     } catch (error) {
       console.error('Error parsing user data:', error);
       navigate('/admin/login');
+    } finally {
+      // Always mark auth as checked, whether successful or not
+      setAuthChecked(true);
     }
   }, []); // Empty dependency array - only run once on mount
 
@@ -87,6 +91,19 @@ const DashboardLayout = () => {
 
   const currentPage = navItems.find(item => item.path === location.pathname);
 
+  // Show loading while checking authentication
+  if (!authChecked) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-secondary">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Only redirect after auth check is complete
   if (!user) {
     return <Navigate to="/admin/login" replace />;
   }
