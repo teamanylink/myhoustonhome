@@ -191,7 +191,7 @@ const DashboardLayout = () => {
         </header>
 
         <main className="admin-content">
-          <Outlet key={location.pathname} />
+          <Outlet />
         </main>
       </div>
     </div>

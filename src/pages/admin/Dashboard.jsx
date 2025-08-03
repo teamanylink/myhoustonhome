@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import apiService from '../../services/apiService';
 
 const Dashboard = () => {
-  const hasLoadedRef = useRef(false);
   const [stats, setStats] = useState({
     totalCommunities: 0,
     totalListings: 0,
@@ -14,109 +13,27 @@ const Dashboard = () => {
   const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
 
-  useEffect(() => {
-    if (hasLoadedRef.current) {
-      console.log('🔄 new Dashboard already loaded, skipping...');
-      return;
-    }
-    
-    let isMounted = true;
-    hasLoadedRef.current = true;
-    
-    const fetchDashboardData = async () => {
-      try {
-        if (!isMounted) return;
-        setLoading(true);
-        setError('');
-        
-        console.log('🔄 newLoading dashboard data...');
-        console.log('🔍 Environment check:', {
-          baseURL: apiService.baseURL,
-          hasToken: !!apiService.getToken(),
-          env: import.meta.env.MODE,
-          apiUrl: import.meta.env.VITE_API_URL
-        });
-        
-        // Fetch communities, listings, and properties
-        const [communities, listings, properties] = await Promise.all([
-          apiService.getCommunities(),
-          apiService.getListings(),
-          apiService.getProperties()
-        ]);
-
-        if (!isMounted) return;
-
-        console.log('✅ Dashboard data loaded:', {
-          communities: communities.length,
-          listings: listings.length,
-          properties: properties.length
-        });
-
-        // Update stats
-        const newStats = {
-          totalCommunities: communities.length,
-          totalListings: listings.length,
-          totalProperties: properties.length,
-          recentActivity: [
-            ...communities.slice(-3).map(c => ({ 
-              type: 'Community', 
-              name: c.name, 
-              action: 'added',
-              id: c.id 
-            })),
-            ...listings.slice(-3).map(l => ({ 
-              type: 'Listing', 
-              name: l.title, 
-              action: 'added',
-              id: l.id 
-            })),
-            ...properties.slice(-3).map(p => ({ 
-              type: 'Property', 
-              name: p.title || p.address, 
-              action: 'added',
-              id: p.id 
-            }))
-          ].slice(-5)
-        };
-        
-        console.log('📊 Setting dashboard stats:', newStats);
-        setStats(newStats);
-        
-        setLastUpdated(new Date());
-        setError('');
-        
-      } catch (error) {
-        if (!isMounted) return;
-        console.error('❌ Error loading dashboard data:', error);
-        setError('Failed to load dashboard data. Please try again.');
-      } finally {
-        if (isMounted) {
-          console.log('✅ Dashboard loading complete, setting loading to false');
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchDashboardData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []); // Empty dependency array - only run once on mount
-
-  const handleRefresh = async () => {
+  const fetchDashboardData = async () => {
     try {
       setLoading(true);
       setError('');
       
-      console.log('🔄 Refreshing dashboard data...');
+      console.log('🔄 Loading dashboard data...');
       
+      // Fetch communities, listings, and properties
       const [communities, listings, properties] = await Promise.all([
         apiService.getCommunities(),
         apiService.getListings(),
         apiService.getProperties()
       ]);
 
+      console.log('✅ Dashboard data loaded:', {
+        communities: communities.length,
+        listings: listings.length,
+        properties: properties.length
+      });
+
+      // Update stats
       setStats({
         totalCommunities: communities.length,
         totalListings: listings.length,
@@ -147,15 +64,25 @@ const Dashboard = () => {
       setError('');
       
     } catch (error) {
-      console.error('❌ Error refreshing dashboard data:', error);
-      setError('Failed to refresh data. Please try again.');
+      console.error('❌ Error loading dashboard data:', error);
+      setError('Failed to load dashboard data. Please try again.');
     } finally {
+      console.log('✅ Dashboard loading complete, setting loading to false');
       setLoading(false);
     }
   };
 
+  // Run on component mount
+  useEffect(() => {
+    fetchDashboardData();
+  }, []); // Empty dependency array = only run once on mount
+
+  const handleRefresh = async () => {
+    console.log('🔄 Refreshing dashboard data...');
+    await fetchDashboardData();
+  };
+
   if (loading) {
-    console.log('🔄 Dashboard is in loading state');
     return (
       <div className="space-y-6">
         <div className="section-header">
